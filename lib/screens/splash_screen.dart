@@ -20,7 +20,7 @@ class _SplashScreenState extends State<SplashScreen> {
     final auth = Provider.of<AuthProvider>(context, listen: false);
     await auth.tryAutoLogin();
     if (auth.isAuthenticated) {
-      Navigator.of(context).pushReplacementNamed('/profile');
+      Navigator.of(context).pushReplacementNamed('/home');
     } else {
       Navigator.of(context).pushReplacementNamed('/login');
     }

@@ -17,6 +17,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final _nameCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
+  final _confirmPasswordCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
   
   // Department dropdown state
@@ -61,6 +62,7 @@ class _SignupScreenState extends State<SignupScreen> {
     _nameCtrl.dispose();
     _emailCtrl.dispose();
     _passwordCtrl.dispose();
+    _confirmPasswordCtrl.dispose();
     _phoneCtrl.dispose();
     super.dispose();
   }
@@ -81,6 +83,12 @@ class _SignupScreenState extends State<SignupScreen> {
     if (v == null || v.length < 8) return 'Password must be at least 8 chars';
     if (!RegExp(r'[A-Za-z]').hasMatch(v) || !RegExp(r'\d').hasMatch(v))
       return 'Include letters and numbers';
+    return null;
+  }
+
+  String? _validateConfirmPassword(String? v) {
+    if (v == null || v.isEmpty) return 'Confirm your password';
+    if (v != _passwordCtrl.text) return 'Passwords do not match';
     return null;
   }
 
@@ -117,75 +125,219 @@ class _SignupScreenState extends State<SignupScreen> {
   Widget build(BuildContext context) {
     final auth = Provider.of<AuthProvider>(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Sign up')),
+      backgroundColor: const Color(0xFF252525),
       body: auth.isLoading
           ? const Center(child: LoadingWidget())
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Form(
-                key: _formKey,
-                child: ListView(
-                  children: [
-                    TextFormField(
+          : SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const SizedBox(height: 40),
+                      const Text(
+                        'Sign Up',
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 30),
+                      TextFormField(
                         controller: _nameCtrl,
-                        decoration: const InputDecoration(labelText: 'Name'),
-                        validator: _validateName),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                        controller: _emailCtrl,
-                        decoration: const InputDecoration(labelText: 'Email'),
-                        validator: _validateEmail,
-                        keyboardType: TextInputType.emailAddress),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                        controller: _passwordCtrl,
-                        decoration:
-                            const InputDecoration(labelText: 'Password'),
-                        obscureText: true,
-                        validator: _validatePassword),
-                    const SizedBox(height: 12),
-                    _loadingDepartments
-                        ? const Center(child: CircularProgressIndicator())
-                        : DropdownButtonFormField<String>(
-                            value: _selectedDepartmentCode,
-                            decoration: const InputDecoration(
-                              labelText: 'Department',
-                              border: OutlineInputBorder(),
-                            ),
-                            items: _departments.map((dept) {
-                              return DropdownMenuItem(
-                                value: dept.code,
-                                child: Text('${dept.code} - ${dept.name}'),
-                              );
-                            }).toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                _selectedDepartmentCode = value;
-                              });
-                            },
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please select a department';
-                              }
-                              return null;
-                            },
+                        decoration: InputDecoration(
+                          labelText: 'Username',
+                          labelStyle: const TextStyle(color: Color(0xFF888888)),
+                          filled: true,
+                          fillColor: const Color(0xFFD9D9D9),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                            borderSide: BorderSide.none,
                           ),
-                    const SizedBox(height: 12),
-                    TextFormField(
+                        ),
+                        style: const TextStyle(color: Colors.black),
+                        validator: _validateName,
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _emailCtrl,
+                        decoration: InputDecoration(
+                          labelText: 'Email',
+                          labelStyle: const TextStyle(color: Color(0xFF888888)),
+                          filled: true,
+                          fillColor: const Color(0xFFD9D9D9),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        style: const TextStyle(color: Colors.black),
+                        validator: _validateEmail,
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _passwordCtrl,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          labelStyle: const TextStyle(color: Color(0xFF888888)),
+                          filled: true,
+                          fillColor: const Color(0xFFD9D9D9),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        style: const TextStyle(color: Colors.black),
+                        obscureText: true,
+                        validator: _validatePassword,
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _confirmPasswordCtrl,
+                        decoration: InputDecoration(
+                          labelText: 'Confirmation Password',
+                          labelStyle: const TextStyle(color: Color(0xFF888888)),
+                          filled: true,
+                          fillColor: const Color(0xFFD9D9D9),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        style: const TextStyle(color: Colors.black),
+                        obscureText: true,
+                        validator: _validateConfirmPassword,
+                      ),
+                      const SizedBox(height: 16),
+                      _loadingDepartments
+                          ? const Center(child: CircularProgressIndicator())
+                          : DropdownButtonFormField<String>(
+                              value: _selectedDepartmentCode,
+                              decoration: InputDecoration(
+                                labelText: 'Department',
+                                labelStyle: const TextStyle(color: Color(0xFF888888)),
+                                filled: true,
+                                fillColor: const Color(0xFFD9D9D9),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                              style: const TextStyle(color: Colors.black),
+                              dropdownColor: const Color(0xFFD9D9D9),
+                              items: _departments.map((dept) {
+                                return DropdownMenuItem(
+                                  value: dept.code,
+                                  child: Text('${dept.code} - ${dept.name}'),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  _selectedDepartmentCode = value;
+                                });
+                              },
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please select a department';
+                                }
+                                return null;
+                              },
+                            ),
+                      const SizedBox(height: 16),
+                      TextFormField(
                         controller: _phoneCtrl,
-                        decoration: const InputDecoration(
-                            labelText: 'Phone Number (with country code)'),
+                        decoration: InputDecoration(
+                          labelText: 'Phone Number (with country code)',
+                          labelStyle: const TextStyle(color: Color(0xFF888888)),
+                          filled: true,
+                          fillColor: const Color(0xFFD9D9D9),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        style: const TextStyle(color: Colors.black),
                         keyboardType: TextInputType.phone,
-                        validator: _validatePhone),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
+                        validator: _validatePhone,
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
                         onPressed: _submit,
-                        child: const Text('Create account')),
-                    TextButton(
-                        onPressed: () => Navigator.of(context)
-                            .pushReplacementNamed('/login'),
-                        child: const Text('Already have an account? Login'))
-                  ],
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF3F967F),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                        ),
+                        child: const Text(
+                          'Sign Up',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Expanded(child: Divider(color: Colors.white24)),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Text(
+                              'OR',
+                              style: TextStyle(color: Colors.white60),
+                            ),
+                          ),
+                          Expanded(child: Divider(color: Colors.white24)),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      OutlinedButton.icon(
+                        onPressed: () {
+                          // TODO: Implement Google Sign-In
+                        },
+                        icon: Image.asset(
+                          'assets/google_icon.png',
+                          height: 24,
+                          errorBuilder: (_, __, ___) => const Icon(Icons.g_mobiledata, size: 24),
+                        ),
+                        label: const Text('Sign up with Google'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side: const BorderSide(color: Colors.white24),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            "Already have an account? ",
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                          TextButton(
+                            onPressed: () =>
+                                Navigator.of(context).pushReplacementNamed('/login'),
+                            child: const Text(
+                              'Sign In',
+                              style: TextStyle(
+                                color: Color(0xFF3F967F),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
