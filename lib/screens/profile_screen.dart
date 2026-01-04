@@ -9,6 +9,9 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final auth = Provider.of<AuthProvider>(context);
     final user = auth.user;
+    final size = MediaQuery.of(context).size;
+    final padding = size.width * 0.06;
+    
     return Scaffold(
       backgroundColor: const Color(0xFF252525),
       appBar: AppBar(
@@ -31,7 +34,7 @@ class ProfileScreen extends StatelessWidget {
               ),
             )
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(24.0),
+              padding: EdgeInsets.all(padding),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

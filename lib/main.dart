@@ -10,6 +10,10 @@ import 'screens/signup_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/ask_question_screen.dart';
+import 'screens/rules_screen.dart';
+import 'screens/mark_calculator_screen.dart';
+import 'screens/cgpa_calculator_screen.dart';
+import 'screens/credits_calculator_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -77,6 +81,10 @@ class MyApp extends StatelessWidget {
           '/signup': (_) => const SignupScreen(),
           '/profile': (_) => const ProfileScreen(),
           '/ask': (_) => const AskQuestionScreen(),
+          '/rules': (_) => const RulesScreen(),
+          '/mark-calculator': (_) => const MarkCalculatorScreen(),
+          '/cgpa-calculator': (_) => const CgpaCalculatorScreen(),
+          '/credits-calculator': (_) => const CreditsCalculatorScreen(),
         },
       ),
     );

@@ -14,7 +14,7 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
   final _questionCtrl = TextEditingController();
   final _scrollController = ScrollController();
   final List<ChatMessage> _messages = [];
-  bool _loading = false;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -35,13 +35,56 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
     });
   }
 
+  String _formatAnswer(String answer) {
+    // Remove extra whitespace and normalize
+    answer = answer.trim();
+    
+    // If answer is short (less than 100 chars), return as is
+    if (answer.length < 100) return answer;
+
+    // Check if answer already contains numbered points or bullet points
+    if (answer.contains(RegExp(r'^\s*[\d•\-\*]+[\.\)]\s', multiLine: true))) {
+      return answer;
+    }
+
+    // Split by sentence delimiters (period, exclamation, question mark)
+    final sentences = answer
+        .split(RegExp(r'(?<=[.!?])\s+'))
+        .where((s) => s.trim().isNotEmpty)
+        .toList();
+    
+    // If we have multiple sentences (3 or more), format as bullet points
+    if (sentences.length >= 3) {
+      return sentences.map((s) {
+        // Remove trailing punctuation if it's at the end
+        String cleaned = s.trim();
+        if (cleaned.endsWith('.') || cleaned.endsWith('!') || cleaned.endsWith('?')) {
+          cleaned = cleaned.substring(0, cleaned.length - 1);
+        }
+        return '• $cleaned';
+      }).join('\n\n');
+    }
+
+    // For medium length answers, try to split by semicolons or colons
+    if (answer.contains(';')) {
+      final parts = answer.split(';')
+          .where((p) => p.trim().isNotEmpty && p.trim().length > 10)
+          .toList();
+      if (parts.length >= 3) {
+        return parts.map((p) => '• ${p.trim()}').join('\n\n');
+      }
+    }
+
+    return answer;
+  }
+
   Future<void> _submit() async {
     final question = _questionCtrl.text.trim();
     if (question.isEmpty) return;
 
     setState(() {
       _messages.add(ChatMessage(text: question, isUser: true));
-      _loading = true;
+      _isLoading = true;
     });
     _questionCtrl.clear();
     _scrollToBottom();
@@ -49,24 +92,31 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
     final api = Provider.of<AuthProvider>(context, listen: false).api;
     try {
       final res = await api.askQuestion(question: question);
-      final answer =
+      final rawAnswer =
           res['answer']?.toString() ?? res['data']?.toString() ?? 'No answer';
+      
+      // Format the answer into bullet points if applicable
+      final formattedAnswer = _formatAnswer(rawAnswer);
+      
       setState(() {
-        _messages.add(ChatMessage(text: answer, isUser: false));
+        _messages.add(ChatMessage(text: formattedAnswer, isUser: false));
+        _isLoading = false;
       });
       _scrollToBottom();
     } catch (e) {
+      setState(() => _isLoading = false);
       showDialog(
         context: context,
         builder: (_) => ErrorDialog(message: e.toString()),
       );
-    } finally {
-      setState(() => _loading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final padding = size.width * 0.04;
+    
     return Scaffold(
       backgroundColor: const Color(0xFF252525),
       appBar: AppBar(
@@ -82,14 +132,6 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
           'AI Assistant',
           style: TextStyle(color: Colors.white),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.account_circle, color: Colors.white),
-            onPressed: () {
-              Navigator.of(context).pushNamed('/profile');
-            },
-          ),
-        ],
       ),
       body: Column(
         children: [
@@ -100,19 +142,19 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
-                          width: 120,
-                          height: 120,
+                          width: size.width * 0.3,
+                          height: size.width * 0.3,
                           decoration: BoxDecoration(
                             color: const Color(0xFF3F967F),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.chat_bubble_outline,
-                            size: 60,
+                            size: size.width * 0.15,
                             color: Colors.white,
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        SizedBox(height: size.height * 0.02),
                         const Text(
                           'Ask me anything!',
                           style: TextStyle(
@@ -126,35 +168,17 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
                   )
                 : ListView.builder(
                     controller: _scrollController,
-                    padding: const EdgeInsets.all(16),
-                    itemCount: _messages.length,
+                    padding: EdgeInsets.all(padding),
+                    itemCount: _messages.length + (_isLoading ? 1 : 0),
                     itemBuilder: (context, index) {
+                      if (_isLoading && index == _messages.length) {
+                        // Show loading bubble
+                        return _LoadingBubble();
+                      }
                       return _ChatBubble(message: _messages[index]);
                     },
                   ),
           ),
-          if (_loading)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: const [
-                  SizedBox(width: 16),
-                  SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF3F967F)),
-                    ),
-                  ),
-                  SizedBox(width: 12),
-                  Text(
-                    'Assistant is typing...',
-                    style: TextStyle(color: Colors.white60, fontSize: 14),
-                  ),
-                ],
-              ),
-            ),
           Container(
             decoration: BoxDecoration(
               color: const Color(0xFF2D2D2D),
@@ -166,7 +190,7 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
                 ),
               ],
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: EdgeInsets.symmetric(horizontal: padding, vertical: 12),
             child: Row(
               children: [
                 Expanded(
@@ -260,6 +284,7 @@ class _ChatBubble extends StatelessWidget {
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 15,
+                  height: 1.5,
                 ),
               ),
             ),
@@ -272,6 +297,104 @@ class _ChatBubble extends StatelessWidget {
               child: const Icon(Icons.person, size: 18, color: Colors.white),
             ),
         ],
+      ),
+    );
+  }
+}
+
+class _LoadingBubble extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CircleAvatar(
+            backgroundColor: const Color(0xFF3F967F),
+            radius: 16,
+            child: const Icon(Icons.smart_toy, size: 18, color: Colors.white),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF3D3D3D),
+              borderRadius: BorderRadius.only(
+                topLeft: const Radius.circular(20),
+                topRight: const Radius.circular(20),
+                bottomLeft: const Radius.circular(4),
+                bottomRight: const Radius.circular(20),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _DotAnimation(delay: 0),
+                const SizedBox(width: 4),
+                _DotAnimation(delay: 200),
+                const SizedBox(width: 4),
+                _DotAnimation(delay: 400),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DotAnimation extends StatefulWidget {
+  final int delay;
+
+  const _DotAnimation({required this.delay});
+
+  @override
+  State<_DotAnimation> createState() => _DotAnimationState();
+}
+
+class _DotAnimationState extends State<_DotAnimation>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+
+    _animation = Tween<double>(begin: 0.4, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+
+    Future.delayed(Duration(milliseconds: widget.delay), () {
+      if (mounted) {
+        _controller.repeat(reverse: true);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _animation,
+      child: Container(
+        width: 8,
+        height: 8,
+        decoration: BoxDecoration(
+          color: Colors.white70,
+          shape: BoxShape.circle,
+        ),
       ),
     );
   }
