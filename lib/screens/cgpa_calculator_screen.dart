@@ -92,17 +92,17 @@ class _CgpaCalculatorScreenState extends State<CgpaCalculatorScreen> {
     final padding = size.width * 0.06;
     
     return Scaffold(
-      backgroundColor: const Color(0xFF252525),
+      backgroundColor: const Color(0xFFfdf0d5),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF252525),
+        backgroundColor: const Color(0xFFfdf0d5),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: const Text(
           'CGPA Calculator',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.black),
         ),
       ),
       body: SingleChildScrollView(
@@ -115,7 +115,7 @@ class _CgpaCalculatorScreenState extends State<CgpaCalculatorScreen> {
               const Text(
                 'Enter GPA and Credits for each semester',
                 style: TextStyle(
-                  color: Colors.white70,
+                  color: Colors.black54,
                   fontSize: 16,
                 ),
               ),
@@ -126,8 +126,15 @@ class _CgpaCalculatorScreenState extends State<CgpaCalculatorScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF3D3D3D),
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,7 +145,7 @@ class _CgpaCalculatorScreenState extends State<CgpaCalculatorScreen> {
                             Text(
                               'Semester ${_semesters[index].semesterNumber}',
                               style: const TextStyle(
-                                color: Colors.white,
+                                color: Colors.black,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -160,9 +167,9 @@ class _CgpaCalculatorScreenState extends State<CgpaCalculatorScreen> {
                                 controller: _semesters[index].gpaController,
                                 decoration: InputDecoration(
                                   labelText: 'GPA (0-10)',
-                                  labelStyle: const TextStyle(color: Color(0xFF888888)),
+                                  labelStyle: const TextStyle(color: Colors.black54),
                                   filled: true,
-                                  fillColor: const Color(0xFFD9D9D9),
+                                  fillColor: Colors.white,
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(15),
                                     borderSide: BorderSide.none,
@@ -187,9 +194,9 @@ class _CgpaCalculatorScreenState extends State<CgpaCalculatorScreen> {
                                 controller: _semesters[index].creditsController,
                                 decoration: InputDecoration(
                                   labelText: 'Credits',
-                                  labelStyle: const TextStyle(color: Color(0xFF888888)),
+                                  labelStyle: const TextStyle(color: Colors.black54),
                                   filled: true,
-                                  fillColor: const Color(0xFFD9D9D9),
+                                  fillColor: Colors.white,
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(15),
                                     borderSide: BorderSide.none,
@@ -220,8 +227,8 @@ class _CgpaCalculatorScreenState extends State<CgpaCalculatorScreen> {
                 icon: const Icon(Icons.add),
                 label: const Text('Add Semester'),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  side: const BorderSide(color: Colors.white24),
+                  foregroundColor: Colors.black,
+                  side: const BorderSide(color: Colors.black26),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
@@ -235,7 +242,7 @@ class _CgpaCalculatorScreenState extends State<CgpaCalculatorScreen> {
                     child: ElevatedButton(
                       onPressed: _calculateCGPA,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFB55B61),
+                        backgroundColor: const Color(0xFFc1121f),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
@@ -253,8 +260,8 @@ class _CgpaCalculatorScreenState extends State<CgpaCalculatorScreen> {
                     child: OutlinedButton(
                       onPressed: _reset,
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        side: const BorderSide(color: Colors.white24),
+                        foregroundColor: Colors.black,
+                        side: const BorderSide(color: Colors.black26),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
@@ -273,15 +280,22 @@ class _CgpaCalculatorScreenState extends State<CgpaCalculatorScreen> {
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF3D3D3D),
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(15),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
                   child: Column(
                     children: [
                       const Text(
                         'Your CGPA',
                         style: TextStyle(
-                          color: Colors.white70,
+                          color: Colors.black54,
                           fontSize: 16,
                         ),
                       ),
@@ -289,7 +303,7 @@ class _CgpaCalculatorScreenState extends State<CgpaCalculatorScreen> {
                       Text(
                         _cgpa!.toStringAsFixed(2),
                         style: const TextStyle(
-                          color: Color(0xFFB55B61),
+                          color: Color(0xFF003049),
                           fontSize: 48,
                           fontWeight: FontWeight.bold,
                         ),
@@ -298,7 +312,7 @@ class _CgpaCalculatorScreenState extends State<CgpaCalculatorScreen> {
                       Text(
                         _getGradeClassification(_cgpa!),
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: Colors.black,
                           fontSize: 20,
                           fontWeight: FontWeight.w500,
                         ),

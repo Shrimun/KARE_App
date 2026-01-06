@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../providers/auth_provider.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -14,7 +15,7 @@ class HomeScreen extends StatelessWidget {
     final padding = size.width * 0.05;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF252525),
+      backgroundColor: const Color(0xFFfdf0d5),
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.all(padding),
@@ -26,7 +27,7 @@ class HomeScreen extends StatelessWidget {
                 onTap: () => Navigator.of(context).pushNamed('/profile'),
                 child: CircleAvatar(
                   radius: isSmallDevice ? 18 : 20,
-                  backgroundColor: Colors.grey[800],
+                  backgroundColor: const Color(0xFF669bbc),
                   child: Icon(Icons.person, color: Colors.white, size: isSmallDevice ? 20 : 24),
                 ),
               ),
@@ -40,11 +41,11 @@ class HomeScreen extends StatelessWidget {
                     width: size.width * 0.6,
                     height: size.width * 0.6,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF252525),
+                      color: const Color(0xFF003049),
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.black.withOpacity(0.1),
                           blurRadius: 20,
                           spreadRadius: -9,
                           offset: const Offset(-2, -6),
@@ -84,7 +85,7 @@ class HomeScreen extends StatelessWidget {
               Text(
                 'Explore',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: const Color(0xFF003049),
                   fontSize: isSmallDevice ? 20 : 24,
                   fontFamily: 'Poppins',
                   fontWeight: FontWeight.w600,
@@ -102,25 +103,34 @@ class HomeScreen extends StatelessWidget {
                   children: [
                     _ExploreCard(
                       title: 'Rules and\nRegulations',
-                      color: const Color(0xFF3F967F),
+                      color: const Color(0xFFc1121f),
                       icon: Icons.book_outlined,
                       onTap: () => Navigator.of(context).pushNamed('/rules'),
                     ),
                     _ExploreCard(
-                      title: 'Mark\nCalculator',
-                      color: const Color(0xFF7F5AB1),
-                      icon: Icons.calculate_outlined,
-                      onTap: () => Navigator.of(context).pushNamed('/mark-calculator'),
+                      title: 'SIS Login',
+                      color: const Color(0xFF669bbc),
+                      icon: Icons.language,
+                      onTap: () async {
+                        final url = Uri.parse('https://sis.kalasalingam.ac.in/login');
+                        if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Could not launch SIS website')),
+                            );
+                          }
+                        }
+                      },
                     ),
                     _ExploreCard(
                       title: 'CGPA\nCalculator',
-                      color: const Color(0xFFB55B61),
+                      color: const Color(0xFFc1121f),
                       icon: Icons.assessment_outlined,
                       onTap: () => Navigator.of(context).pushNamed('/cgpa-calculator'),
                     ),
                     _ExploreCard(
                       title: 'Credits\nCalculator',
-                      color: const Color(0xFFB4B65D),
+                      color: const Color(0xFF669bbc),
                       icon: Icons.school_outlined,
                       onTap: () => Navigator.of(context).pushNamed('/credits-calculator'),
                     ),

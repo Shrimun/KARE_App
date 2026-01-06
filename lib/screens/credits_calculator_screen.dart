@@ -76,17 +76,17 @@ class _CreditsCalculatorScreenState extends State<CreditsCalculatorScreen> {
     final padding = size.width * 0.06;
     
     return Scaffold(
-      backgroundColor: const Color(0xFF252525),
+      backgroundColor: const Color(0xFFfdf0d5),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF252525),
+        backgroundColor: const Color(0xFFfdf0d5),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: const Text(
           'Credits Calculator',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.black),
         ),
       ),
       body: SingleChildScrollView(
@@ -99,8 +99,15 @@ class _CreditsCalculatorScreenState extends State<CreditsCalculatorScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF3D3D3D),
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -108,14 +115,14 @@ class _CreditsCalculatorScreenState extends State<CreditsCalculatorScreen> {
                     const Text(
                       'Total Credits Required:',
                       style: TextStyle(
-                        color: Colors.white70,
+                        color: Colors.black54,
                         fontSize: 16,
                       ),
                     ),
                     Text(
                       '$_requiredCredits',
                       style: const TextStyle(
-                        color: Color(0xFFB4B65D),
+                        color: Color(0xFF003049),
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
@@ -127,7 +134,7 @@ class _CreditsCalculatorScreenState extends State<CreditsCalculatorScreen> {
               const Text(
                 'Enter your completed courses',
                 style: TextStyle(
-                  color: Colors.white70,
+                  color: Colors.black54,
                   fontSize: 16,
                 ),
               ),
@@ -138,8 +145,15 @@ class _CreditsCalculatorScreenState extends State<CreditsCalculatorScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF3D3D3D),
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
                     child: Column(
                       children: [
@@ -149,7 +163,7 @@ class _CreditsCalculatorScreenState extends State<CreditsCalculatorScreen> {
                             Text(
                               'Course ${index + 1}',
                               style: const TextStyle(
-                                color: Colors.white,
+                                color: Colors.black,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -168,9 +182,9 @@ class _CreditsCalculatorScreenState extends State<CreditsCalculatorScreen> {
                           controller: _courses[index].courseNameController,
                           decoration: InputDecoration(
                             labelText: 'Course Name',
-                            labelStyle: const TextStyle(color: Color(0xFF888888)),
+                            labelStyle: const TextStyle(color: Colors.black54),
                             filled: true,
-                            fillColor: const Color(0xFFD9D9D9),
+                            fillColor: Colors.white,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(15),
                               borderSide: BorderSide.none,
@@ -183,9 +197,9 @@ class _CreditsCalculatorScreenState extends State<CreditsCalculatorScreen> {
                           controller: _courses[index].creditsController,
                           decoration: InputDecoration(
                             labelText: 'Credits',
-                            labelStyle: const TextStyle(color: Color(0xFF888888)),
+                            labelStyle: const TextStyle(color: Colors.black54),
                             filled: true,
-                            fillColor: const Color(0xFFD9D9D9),
+                            fillColor: Colors.white,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(15),
                               borderSide: BorderSide.none,
@@ -213,8 +227,8 @@ class _CreditsCalculatorScreenState extends State<CreditsCalculatorScreen> {
                 icon: const Icon(Icons.add),
                 label: const Text('Add Course'),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  side: const BorderSide(color: Colors.white24),
+                  foregroundColor: Colors.black,
+                  side: const BorderSide(color: Colors.black26),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
@@ -228,7 +242,7 @@ class _CreditsCalculatorScreenState extends State<CreditsCalculatorScreen> {
                     child: ElevatedButton(
                       onPressed: _calculateCredits,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFB4B65D),
+                        backgroundColor: const Color(0xFFc1121f),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
@@ -246,8 +260,8 @@ class _CreditsCalculatorScreenState extends State<CreditsCalculatorScreen> {
                     child: OutlinedButton(
                       onPressed: _reset,
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        side: const BorderSide(color: Colors.white24),
+                        foregroundColor: Colors.black,
+                        side: const BorderSide(color: Colors.black26),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
@@ -266,8 +280,15 @@ class _CreditsCalculatorScreenState extends State<CreditsCalculatorScreen> {
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF3D3D3D),
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(15),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
                   child: Column(
                     children: [
@@ -277,14 +298,14 @@ class _CreditsCalculatorScreenState extends State<CreditsCalculatorScreen> {
                           const Text(
                             'Credits Completed:',
                             style: TextStyle(
-                              color: Colors.white70,
+                              color: Colors.black54,
                               fontSize: 16,
                             ),
                           ),
                           Text(
                             '$_totalCredits',
                             style: const TextStyle(
-                              color: Color(0xFFB4B65D),
+                              color: Color(0xFF003049),
                               fontSize: 32,
                               fontWeight: FontWeight.bold,
                             ),
@@ -292,15 +313,15 @@ class _CreditsCalculatorScreenState extends State<CreditsCalculatorScreen> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      const Divider(color: Colors.white24),
+                      Divider(color: Colors.grey[300]),
                       const SizedBox(height: 16),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
+                          Text(
                             'Credits Remaining:',
                             style: TextStyle(
-                              color: Colors.white70,
+                              color: Colors.grey[600],
                               fontSize: 16,
                             ),
                           ),
@@ -308,8 +329,8 @@ class _CreditsCalculatorScreenState extends State<CreditsCalculatorScreen> {
                             '$_remainingCredits',
                             style: TextStyle(
                               color: _remainingCredits! > 0
-                                  ? const Color(0xFFB55B61)
-                                  : const Color(0xFF3F967F),
+                                  ? const Color(0xFF669bbc)
+                                  : Colors.green, // Completed
                               fontSize: 32,
                               fontWeight: FontWeight.bold,
                             ),
@@ -319,17 +340,17 @@ class _CreditsCalculatorScreenState extends State<CreditsCalculatorScreen> {
                       const SizedBox(height: 16),
                       LinearProgressIndicator(
                         value: _totalCredits! / _requiredCredits,
-                        backgroundColor: Colors.white24,
+                        backgroundColor: Colors.grey[200],
                         valueColor: const AlwaysStoppedAnimation<Color>(
-                          Color(0xFFB4B65D),
+                          Color(0xFF669bbc),
                         ),
                         minHeight: 8,
                       ),
                       const SizedBox(height: 8),
                       Text(
                         '${((_totalCredits! / _requiredCredits) * 100).toStringAsFixed(1)}% Complete',
-                        style: const TextStyle(
-                          color: Colors.white70,
+                        style: TextStyle(
+                          color: Colors.grey[600],
                           fontSize: 14,
                         ),
                       ),
@@ -338,18 +359,18 @@ class _CreditsCalculatorScreenState extends State<CreditsCalculatorScreen> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF3F967F).withOpacity(0.2),
+                            color: Colors.green.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: const Row(
                             children: [
-                              Icon(Icons.celebration, color: Color(0xFF3F967F)),
+                              Icon(Icons.celebration, color: Colors.green),
                               SizedBox(width: 12),
                               Expanded(
                                 child: Text(
                                   'Congratulations! You have completed all required credits!',
                                   style: TextStyle(
-                                    color: Color(0xFF3F967F),
+                                    color: Colors.green,
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
                                   ),

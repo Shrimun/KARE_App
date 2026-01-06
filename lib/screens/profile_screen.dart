@@ -13,16 +13,16 @@ class ProfileScreen extends StatelessWidget {
     final padding = size.width * 0.06;
     
     return Scaffold(
-      backgroundColor: const Color(0xFF252525),
+      backgroundColor: const Color(0xFFfdf0d5),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF252525),
+        backgroundColor: const Color(0xFFfdf0d5),
         elevation: 0,
         title: const Text(
           'Profile',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Color(0xFF003049)),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF003049)),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -30,7 +30,7 @@ class ProfileScreen extends StatelessWidget {
           ? const Center(
               child: Text(
                 'No profile',
-                style: TextStyle(color: Colors.white70),
+                style: TextStyle(color: Colors.black54),
               ),
             )
           : SingleChildScrollView(
@@ -43,7 +43,7 @@ class ProfileScreen extends StatelessWidget {
                       children: [
                         CircleAvatar(
                           radius: 60,
-                          backgroundColor: const Color(0xFF3F967F),
+                          backgroundColor: const Color(0xFF669bbc),
                           child: Text(
                             user.name.isNotEmpty ? user.name[0].toUpperCase() : 'U',
                             style: const TextStyle(
@@ -59,7 +59,7 @@ class ProfileScreen extends StatelessWidget {
                           style: const TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                            color: Color(0xFF003049),
                           ),
                         ),
                       ],
@@ -98,7 +98,7 @@ class ProfileScreen extends StatelessWidget {
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFB55B61),
+                        backgroundColor: const Color(0xFFc1121f),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
@@ -130,20 +130,27 @@ class _ProfileInfoCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF3D3D3D),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFF3F967F).withOpacity(0.2),
+              color: const Color(0xFF669bbc).withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               icon,
-              color: const Color(0xFF3F967F),
+              color: const Color(0xFF669bbc),
               size: 24,
             ),
           ),
@@ -155,7 +162,7 @@ class _ProfileInfoCard extends StatelessWidget {
                 Text(
                   label,
                   style: const TextStyle(
-                    color: Colors.white60,
+                    color: Colors.black54,
                     fontSize: 14,
                   ),
                 ),
@@ -163,7 +170,7 @@ class _ProfileInfoCard extends StatelessWidget {
                 Text(
                   value,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: Colors.black,
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),

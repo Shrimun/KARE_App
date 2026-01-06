@@ -9,17 +9,17 @@ class RulesScreen extends StatelessWidget {
     final padding = size.width * 0.06;
     
     return Scaffold(
-      backgroundColor: const Color(0xFF252525),
+      backgroundColor: const Color(0xFFfdf0d5),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF252525),
+        backgroundColor: const Color(0xFFfdf0d5),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: const Text(
           'Rules and Regulations',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.black),
         ),
       ),
       body: SingleChildScrollView(
@@ -85,8 +85,15 @@ class RulesScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF3D3D3D),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -94,7 +101,7 @@ class RulesScreen extends StatelessWidget {
           Text(
             title,
             style: const TextStyle(
-              color: Color(0xFF3F967F),
+              color: Color(0xFFc1121f),
               fontSize: 18,
               fontWeight: FontWeight.w600,
             ),
@@ -108,7 +115,7 @@ class RulesScreen extends StatelessWidget {
                     const Text(
                       '• ',
                       style: TextStyle(
-                        color: Colors.white70,
+                        color: Colors.black54,
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -117,7 +124,7 @@ class RulesScreen extends StatelessWidget {
                       child: Text(
                         rule,
                         style: const TextStyle(
-                          color: Colors.white70,
+                          color: Colors.black87,
                           fontSize: 15,
                           height: 1.5,
                         ),

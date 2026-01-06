@@ -34,36 +34,36 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'AI Student Assistant',
         theme: ThemeData(
-          brightness: Brightness.dark,
-          scaffoldBackgroundColor: const Color(0xFF252525),
-          primaryColor: const Color(0xFF3F967F),
-          textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme),
-          colorScheme: ColorScheme.dark(
-            primary: const Color(0xFF3F967F),
-            secondary: const Color(0xFF7F5AB1),
-            surface: const Color(0xFF252525),
-            background: const Color(0xFF252525),
+          brightness: Brightness.light,
+          scaffoldBackgroundColor: const Color(0xFFfdf0d5),
+          primaryColor: const Color(0xFF003049),
+          textTheme: GoogleFonts.poppinsTextTheme(ThemeData.light().textTheme),
+          colorScheme: ColorScheme.light(
+            primary: const Color(0xFF003049),
+            secondary: const Color(0xFF669bbc),
+            surface: Colors.white,
+            background: const Color(0xFFfdf0d5),
           ),
           inputDecorationTheme: InputDecorationTheme(
             filled: true,
-            fillColor: const Color(0xFFD9D9D9),
+            fillColor: Colors.white,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(15),
               borderSide: BorderSide.none,
             ),
             labelStyle: TextStyle(
-              color: const Color(0xFF252525).withOpacity(0.61),
+              color: Colors.black54,
               fontSize: 18,
               fontWeight: FontWeight.w500,
             ),
           ),
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF252525),
-              foregroundColor: const Color(0xFFD9D9D9),
+              backgroundColor: const Color(0xFFc1121f),
+              foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
-                side: const BorderSide(color: Color(0xFFD9D9D9)),
+                // Removed side border or matched it to button color
               ),
               padding: const EdgeInsets.symmetric(vertical: 12),
               textStyle: const TextStyle(

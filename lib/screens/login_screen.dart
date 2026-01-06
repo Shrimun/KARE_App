@@ -59,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final padding = size.width * 0.06;
     
     return Scaffold(
-      backgroundColor: const Color(0xFF252525),
+      backgroundColor: const Color(0xFFfdf0d5),
       body: auth.isLoading
           ? const Center(child: LoadingWidget())
           : SafeArea(
@@ -76,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: Color(0xFF003049),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -85,9 +85,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         controller: _emailCtrl,
                         decoration: InputDecoration(
                           labelText: 'Email',
-                          labelStyle: const TextStyle(color: Color(0xFF888888)),
+                          labelStyle: const TextStyle(color: Colors.black54),
                           filled: true,
-                          fillColor: const Color(0xFFD9D9D9),
+                          fillColor: Colors.white,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(15),
                             borderSide: BorderSide.none,
@@ -102,9 +102,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         controller: _passwordCtrl,
                         decoration: InputDecoration(
                           labelText: 'Password',
-                          labelStyle: const TextStyle(color: Color(0xFF888888)),
+                          labelStyle: const TextStyle(color: Colors.black54),
                           filled: true,
-                          fillColor: const Color(0xFFD9D9D9),
+                          fillColor: Colors.white,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(15),
                             borderSide: BorderSide.none,
@@ -123,7 +123,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                           child: const Text(
                             'Forgot Password?',
-                            style: TextStyle(color: Colors.white70),
+                            style: TextStyle(color: Colors.black54),
                           ),
                         ),
                       ),
@@ -131,7 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ElevatedButton(
                         onPressed: _submit,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF3F967F),
+                          backgroundColor: const Color(0xFFc1121f),
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
@@ -146,15 +146,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 20),
                       Row(
                         children: [
-                          Expanded(child: Divider(color: Colors.white24)),
+                          Expanded(child: Divider(color: Colors.black12)),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Text(
                               'OR',
-                              style: TextStyle(color: Colors.white60),
+                              style: TextStyle(color: Colors.black45),
                             ),
                           ),
-                          Expanded(child: Divider(color: Colors.white24)),
+                          Expanded(child: Divider(color: Colors.black12)),
                         ],
                       ),
                       const SizedBox(height: 20),
@@ -169,8 +169,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         label: const Text('Sign in with Google'),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          side: const BorderSide(color: Colors.white24),
+                          foregroundColor: Colors.black,
+                          side: const BorderSide(color: Colors.black12),
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15),
@@ -183,7 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         children: [
                           const Text(
                             "Don't have an account? ",
-                            style: TextStyle(color: Colors.white70),
+                            style: TextStyle(color: Colors.black54),
                           ),
                           TextButton(
                             onPressed: () =>
@@ -191,7 +191,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: const Text(
                               'Sign Up',
                               style: TextStyle(
-                                color: Color(0xFF3F967F),
+                                color: Color(0xFFc1121f),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),

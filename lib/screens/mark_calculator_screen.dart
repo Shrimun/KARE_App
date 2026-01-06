@@ -105,17 +105,17 @@ class _MarkCalculatorScreenState extends State<MarkCalculatorScreen> {
     final padding = size.width * 0.06;
     
     return Scaffold(
-      backgroundColor: const Color(0xFF252525),
+      backgroundColor: const Color(0xFFfdf0d5),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF252525),
+        backgroundColor: const Color(0xFFfdf0d5),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: const Text(
           'Mark Calculator',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.black),
         ),
       ),
       body: SingleChildScrollView(
@@ -128,7 +128,7 @@ class _MarkCalculatorScreenState extends State<MarkCalculatorScreen> {
               const Text(
                 'Enter your subject marks (out of 100)',
                 style: TextStyle(
-                  color: Colors.white70,
+                  color: Colors.black54,
                   fontSize: 16,
                 ),
               ),
@@ -144,9 +144,9 @@ class _MarkCalculatorScreenState extends State<MarkCalculatorScreen> {
                           controller: _subjectControllers[index],
                           decoration: InputDecoration(
                             labelText: 'Subject ${index + 1}',
-                            labelStyle: const TextStyle(color: Color(0xFF888888)),
+                            labelStyle: const TextStyle(color: Colors.black54),
                             filled: true,
-                            fillColor: const Color(0xFFD9D9D9),
+                            fillColor: Colors.white,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(15),
                               borderSide: BorderSide.none,
@@ -162,9 +162,9 @@ class _MarkCalculatorScreenState extends State<MarkCalculatorScreen> {
                           controller: _markControllers[index],
                           decoration: InputDecoration(
                             labelText: 'Marks',
-                            labelStyle: const TextStyle(color: Color(0xFF888888)),
+                            labelStyle: const TextStyle(color: Colors.black54),
                             filled: true,
-                            fillColor: const Color(0xFFD9D9D9),
+                            fillColor: Colors.white,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(15),
                               borderSide: BorderSide.none,
@@ -197,8 +197,8 @@ class _MarkCalculatorScreenState extends State<MarkCalculatorScreen> {
                 icon: const Icon(Icons.add),
                 label: const Text('Add Subject'),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  side: const BorderSide(color: Colors.white24),
+                  foregroundColor: Colors.black,
+                  side: const BorderSide(color: Colors.black26),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
@@ -212,7 +212,7 @@ class _MarkCalculatorScreenState extends State<MarkCalculatorScreen> {
                     child: ElevatedButton(
                       onPressed: _calculateMarks,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF7F5AB1),
+                        backgroundColor: const Color(0xFFc1121f),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
@@ -230,8 +230,8 @@ class _MarkCalculatorScreenState extends State<MarkCalculatorScreen> {
                     child: OutlinedButton(
                       onPressed: _reset,
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        side: const BorderSide(color: Colors.white24),
+                        foregroundColor: Colors.black,
+                        side: const BorderSide(color: Colors.black26),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
@@ -250,15 +250,22 @@ class _MarkCalculatorScreenState extends State<MarkCalculatorScreen> {
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF3D3D3D),
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(15),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
                   child: Column(
                     children: [
                       const Text(
                         'Result',
                         style: TextStyle(
-                          color: Colors.white70,
+                          color: Colors.black54,
                           fontSize: 16,
                         ),
                       ),
@@ -266,7 +273,7 @@ class _MarkCalculatorScreenState extends State<MarkCalculatorScreen> {
                       Text(
                         '${_percentage!.toStringAsFixed(2)}%',
                         style: const TextStyle(
-                          color: Color(0xFF7F5AB1),
+                          color: Color(0xFF003049),
                           fontSize: 48,
                           fontWeight: FontWeight.bold,
                         ),
@@ -275,7 +282,7 @@ class _MarkCalculatorScreenState extends State<MarkCalculatorScreen> {
                       Text(
                         _grade!,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: Colors.black,
                           fontSize: 20,
                           fontWeight: FontWeight.w500,
                         ),

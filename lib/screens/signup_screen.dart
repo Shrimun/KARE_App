@@ -128,7 +128,7 @@ class _SignupScreenState extends State<SignupScreen> {
     final padding = size.width * 0.06;
     
     return Scaffold(
-      backgroundColor: const Color(0xFF252525),
+      backgroundColor: const Color(0xFFfdf0d5),
       body: auth.isLoading
           ? const Center(child: LoadingWidget())
           : SafeArea(
@@ -145,7 +145,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: Colors.black,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -154,9 +154,9 @@ class _SignupScreenState extends State<SignupScreen> {
                         controller: _nameCtrl,
                         decoration: InputDecoration(
                           labelText: 'Username',
-                          labelStyle: const TextStyle(color: Color(0xFF888888)),
+                          labelStyle: const TextStyle(color: Colors.black54),
                           filled: true,
-                          fillColor: const Color(0xFFD9D9D9),
+                          fillColor: Colors.white,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(15),
                             borderSide: BorderSide.none,
@@ -170,9 +170,9 @@ class _SignupScreenState extends State<SignupScreen> {
                         controller: _emailCtrl,
                         decoration: InputDecoration(
                           labelText: 'Email',
-                          labelStyle: const TextStyle(color: Color(0xFF888888)),
+                          labelStyle: const TextStyle(color: Colors.black54),
                           filled: true,
-                          fillColor: const Color(0xFFD9D9D9),
+                          fillColor: Colors.white,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(15),
                             borderSide: BorderSide.none,
@@ -187,9 +187,9 @@ class _SignupScreenState extends State<SignupScreen> {
                         controller: _passwordCtrl,
                         decoration: InputDecoration(
                           labelText: 'Password',
-                          labelStyle: const TextStyle(color: Color(0xFF888888)),
+                          labelStyle: const TextStyle(color: Colors.black54),
                           filled: true,
-                          fillColor: const Color(0xFFD9D9D9),
+                          fillColor: Colors.white,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(15),
                             borderSide: BorderSide.none,
@@ -204,9 +204,9 @@ class _SignupScreenState extends State<SignupScreen> {
                         controller: _confirmPasswordCtrl,
                         decoration: InputDecoration(
                           labelText: 'Confirmation Password',
-                          labelStyle: const TextStyle(color: Color(0xFF888888)),
+                          labelStyle: const TextStyle(color: Colors.black54),
                           filled: true,
-                          fillColor: const Color(0xFFD9D9D9),
+                          fillColor: Colors.white,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(15),
                             borderSide: BorderSide.none,
@@ -223,20 +223,23 @@ class _SignupScreenState extends State<SignupScreen> {
                               value: _selectedDepartmentCode,
                               decoration: InputDecoration(
                                 labelText: 'Department',
-                                labelStyle: const TextStyle(color: Color(0xFF888888)),
+                                labelStyle: const TextStyle(color: Colors.black54),
                                 filled: true,
-                                fillColor: const Color(0xFFD9D9D9),
+                                fillColor: Colors.white,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(15),
                                   borderSide: BorderSide.none,
                                 ),
                               ),
                               style: const TextStyle(color: Colors.black),
-                              dropdownColor: const Color(0xFFD9D9D9),
+                              dropdownColor: Colors.white,
                               items: _departments.map((dept) {
                                 return DropdownMenuItem(
                                   value: dept.code,
-                                  child: Text('${dept.code} - ${dept.name}'),
+                                  child: Text(
+                                    '${dept.code} - ${dept.name}',
+                                    style: const TextStyle(color: Colors.black),
+                                  ),
                                 );
                               }).toList(),
                               onChanged: (value) {
@@ -256,9 +259,9 @@ class _SignupScreenState extends State<SignupScreen> {
                         controller: _phoneCtrl,
                         decoration: InputDecoration(
                           labelText: 'Phone Number (with country code)',
-                          labelStyle: const TextStyle(color: Color(0xFF888888)),
+                          labelStyle: const TextStyle(color: Colors.black54),
                           filled: true,
-                          fillColor: const Color(0xFFD9D9D9),
+                          fillColor: Colors.white,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(15),
                             borderSide: BorderSide.none,
@@ -272,7 +275,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       ElevatedButton(
                         onPressed: _submit,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF3F967F),
+                          backgroundColor: const Color(0xFFc1121f),
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
@@ -287,15 +290,15 @@ class _SignupScreenState extends State<SignupScreen> {
                       const SizedBox(height: 20),
                       Row(
                         children: [
-                          Expanded(child: Divider(color: Colors.white24)),
+                          Expanded(child: Divider(color: Colors.black12)),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Text(
                               'OR',
-                              style: TextStyle(color: Colors.white60),
+                              style: TextStyle(color: Colors.black45),
                             ),
                           ),
-                          Expanded(child: Divider(color: Colors.white24)),
+                          Expanded(child: Divider(color: Colors.black12)),
                         ],
                       ),
                       const SizedBox(height: 20),
@@ -310,8 +313,8 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                         label: const Text('Sign up with Google'),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          side: const BorderSide(color: Colors.white24),
+                          foregroundColor: Colors.black,
+                          side: const BorderSide(color: Colors.black12),
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15),
@@ -324,7 +327,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         children: [
                           const Text(
                             "Already have an account? ",
-                            style: TextStyle(color: Colors.white70),
+                            style: TextStyle(color: Colors.black54),
                           ),
                           TextButton(
                             onPressed: () =>
@@ -332,7 +335,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             child: const Text(
                               'Sign In',
                               style: TextStyle(
-                                color: Color(0xFF3F967F),
+                                color: Color(0xFFc1121f),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
