@@ -114,8 +114,8 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
                 _questionCtrl.text = val.recognizedWords;
               });
             },
-            listenFor: const Duration(seconds: 30),
-            pauseFor: const Duration(seconds: 8),
+            listenFor: const Duration(seconds: 60),
+            pauseFor: const Duration(seconds: 10),
             partialResults: true,
             cancelOnError: true,
             listenMode: stt.ListenMode.confirmation,
@@ -321,8 +321,52 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
     _questionCtrl.clear();
     _scrollToBottom();
 
+    // Handle greetings and common conversational phrases without calling API
+    final lowerQuestion = question.toLowerCase();
+    final greetings = ['hello', 'hi', 'hey', 'greetings', 'good morning', 'good afternoon', 'good evening', 'howdy', 'hii', 'hiii', 'hlo'];
+    final howAreYou = ['how are you', 'how r u', 'how are u', 'how r you', 'whatsup', 'what\'s up', 'sup', 'wassup'];
+    final thanks = ['thank you', 'thanks', 'thank u', 'thnx', 'thankyou', 'ty'];
+    
+    if (greetings.any((g) => lowerQuestion == g || lowerQuestion.startsWith('$g ') || lowerQuestion.startsWith('$g!'))) {
+      setState(() {
+        _messages.add(ChatMessage(
+          text: 'Hello! 👋 How can I help you today?',
+          isUser: false,
+        ));
+        _isLoading = false;
+      });
+      _scrollToBottom();
+      return;
+    }
+    
+    if (howAreYou.any((phrase) => lowerQuestion.contains(phrase))) {
+      setState(() {
+        _messages.add(ChatMessage(
+          text: 'I\'m doing great, thank you! How can I assist you with your studies?',
+          isUser: false,
+        ));
+        _isLoading = false;
+      });
+      _scrollToBottom();
+      return;
+    }
+    
+    if (thanks.any((t) => lowerQuestion == t || lowerQuestion.startsWith('$t ') || lowerQuestion.startsWith('$t!'))) {
+      setState(() {
+        _messages.add(ChatMessage(
+          text: 'You\'re welcome! Feel free to ask anything else! 😊',
+          isUser: false,
+        ));
+        _isLoading = false;
+      });
+      _scrollToBottom();
+      return;
+    }
+
     final api = Provider.of<AuthProvider>(context, listen: false).api;
+    
     try {
+      // Send question directly to avoid 500 character limit
       final res = await api.askQuestion(question: question);
       final rawAnswer =
           res['answer']?.toString() ?? res['data']?.toString() ?? 'No answer';
@@ -330,15 +374,32 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
       // AGGRESSIVELY clean up the raw answer - remove ALL chunk markers and metadata
       String cleanedAnswer = rawAnswer.trim();
       
-      // Remove phrases like "answer from this pdf", "from the pdf", "from this document" etc.
-      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'answer from (this|the) (pdf|document|file|text)', caseSensitive: false), '');
-      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'from (this|the) (pdf|document|file|text)', caseSensitive: false), '');
-      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'based on (this|the) (pdf|document|file|text)', caseSensitive: false), '');
-      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'according to (this|the) (pdf|document|file|text)', caseSensitive: false), '');
+      // Remove ALL references to uploaded files, regulations, and documents
+      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'uploaded\s+(regulation|regulations|file|files|document|documents)', caseSensitive: false), '');
+      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'the\s+uploaded\s+(regulation|regulations|file|files|document|documents)', caseSensitive: false), '');
+      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'from\s+uploaded\s+(regulation|regulations|file|files|document|documents)', caseSensitive: false), '');
+      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'(using|based on|according to|as per)\s+uploaded\s+(regulation|regulations|file|files|document|documents)', caseSensitive: false), '');
       
-      // Remove chunk references like "chunk_88", "chunk 128", "chunks: 88, 128" etc.
-      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'chunk[_\s]*\d+', caseSensitive: false), '');
-      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'chunks?[:\s]+[\d,\s]+', caseSensitive: false), '');
+      // Remove phrases like "answer from this pdf", "from the pdf", "from this document" etc.
+      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'answer from (this|the|a|uploaded) (pdf|document|file|text|regulation)', caseSensitive: false), '');
+      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'from (this|the|a|uploaded) (pdf|document|file|text|regulation)', caseSensitive: false), '');
+      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'based on (this|the|a|uploaded) (pdf|document|file|text|regulation)', caseSensitive: false), '');
+      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'according to (this|the|a|uploaded) (pdf|document|file|text|regulation)', caseSensitive: false), '');
+      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'in (this|the|a|uploaded) (pdf|document|file|text|regulation)', caseSensitive: false), '');
+      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'of (this|the|a|uploaded) (pdf|document|file|text|regulation)', caseSensitive: false), '');
+      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'as per (this|the|a|uploaded) (pdf|document|file|text|regulation)', caseSensitive: false), '');
+      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'using (this|the|a|uploaded) (pdf|document|file|text|regulation)', caseSensitive: false), '');
+      
+      // Remove any sentence mentioning "regulation" or "uploaded" documents
+      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'[^.!?]*uploaded[^.!?]*[.!?]', caseSensitive: false), '');
+      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'[^.!?]*regulation\s+document[^.!?]*[.!?]', caseSensitive: false), '');
+      
+      // AGGRESSIVE chunk removal - removes patterns like "chunk_88", "chunksa_26 and 104, 105, 138", "chunks_92 and 103"
+      // This regex captures the entire sequence including comma/and-separated numbers
+      cleanedAnswer = cleanedAnswer.replaceAll(
+        RegExp(r'chunks?\w*[_\s]*\d+(?:\s*(?:,|and)\s*\d+)*', caseSensitive: false),
+        '',
+      );
       
       // Remove any [bracketed] metadata or markers
       cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'\[[^\]]*chunk[^\]]*\]', caseSensitive: false), '');
@@ -379,6 +440,73 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
         builder: (_) => ErrorDialog(message: e.toString()),
       );
     }
+  }
+
+  void _showAttachmentOptions() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFFfdf0d5),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Add Attachment',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF003049),
+              ),
+            ),
+            const SizedBox(height: 20),
+            ListTile(
+              leading: const CircleAvatar(
+                backgroundColor: Color(0xFF669bbc),
+                child: Icon(Icons.insert_drive_file, color: Colors.white),
+              ),
+              title: const Text('File'),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('File picker coming soon!')),
+                );
+              },
+            ),
+            ListTile(
+              leading: const CircleAvatar(
+                backgroundColor: Color(0xFF669bbc),
+                child: Icon(Icons.image, color: Colors.white),
+              ),
+              title: const Text('Image'),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Image picker coming soon!')),
+                );
+              },
+            ),
+            ListTile(
+              leading: const CircleAvatar(
+                backgroundColor: Color(0xFF669bbc),
+                child: Icon(Icons.camera_alt, color: Colors.white),
+              ),
+              title: const Text('Camera'),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Camera coming soon!')),
+                );
+              },
+            ),
+            const SizedBox(height: 10),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -557,6 +685,14 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
             padding: EdgeInsets.symmetric(horizontal: padding, vertical: 12),
             child: Row(
               children: [
+                CircleAvatar(
+                  backgroundColor: const Color(0xFF669bbc),
+                  child: IconButton(
+                    icon: const Icon(Icons.add, color: Colors.white),
+                    onPressed: _showAttachmentOptions,
+                  ),
+                ),
+                const SizedBox(width: 8),
                 Expanded(
                   child: TextField(
                     controller: _questionCtrl,
@@ -575,9 +711,10 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
                       ),
                     ),
                     style: const TextStyle(color: Colors.black),
-                    maxLines: null,
-                    textInputAction: TextInputAction.send,
-                    onSubmitted: (_) => _submit(),
+                    maxLines: 5,
+                    minLines: 1,
+                    textInputAction: TextInputAction.newline,
+                    keyboardType: TextInputType.multiline,
                   ),
                 ),
                 const SizedBox(width: 8),
