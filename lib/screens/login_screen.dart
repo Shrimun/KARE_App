@@ -71,12 +71,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const SizedBox(height: 60),
-                      const Text(
+                      Text(
                         'Sign In',
                         style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF023E8A),
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -188,10 +188,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           TextButton(
                             onPressed: () =>
                                 Navigator.of(context).pushReplacementNamed('/signup'),
-                            child: const Text(
+                            child: Text(
                               'Sign Up',
                               style: TextStyle(
-                                color: Color(0xFF023E8A),
+                                color: Theme.of(context).colorScheme.primary,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),

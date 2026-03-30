@@ -53,16 +53,8 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
         onStatus: (status) {
           debugPrint('Speech status: $status');
           if (status == 'done' || status == 'notListening') {
-            bool wasListening = _isListening;
             setState(() => _isListening = false);
-            // Auto-submit after voice input completes
-            if (wasListening && _questionCtrl.text.trim().isNotEmpty && _voiceActive) {
-              Future.delayed(const Duration(milliseconds: 800), () {
-                if (_questionCtrl.text.trim().isNotEmpty) {
-                  _submit();
-                }
-              });
-            }
+            // Removed auto-submit here so it waits until the user speaks completely and manually submits
           }
         },
         onError: (val) {
@@ -246,100 +238,24 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
   String _formatAnswer(String answer, String question) {
     // Remove extra whitespace and normalize
     answer = answer.trim();
-    
-    // Clean up any chunk markers or extra newlines
+
+    // Remove repeated chunks of newlines
     answer = answer.replaceAll(RegExp(r'\n{3,}'), '\n\n');
-    answer = answer.replaceAll(RegExp(r'\s{2,}'), ' ');
     
-    // Detect if user wants brief/short answer
+    // Check if user wants a brief answer
     final briefKeywords = ['briefly', 'brief', 'short', 'shortly', 'quick', 'quickly', 
                           'summary', 'summarize', 'in short', 'tl;dr', 'concise'];
     final wantsBrief = briefKeywords.any((keyword) => 
         question.toLowerCase().contains(keyword));
     
-    // If answer is short (less than 80 chars), return as is
-    if (answer.length < 80) return answer;
-
-    // Check if answer already contains numbered points or bullet points
-    if (answer.contains(RegExp(r'^\s*[\d•\-\*]+[\.\)]\s', multiLine: true))) {
-      return answer;
-    }
-
-    // If user wants brief answer, keep it short - just return first 1-2 sentences
     if (wantsBrief) {
       final sentences = answer
           .split(RegExp(r'(?<=[.!?])\s+'))
-          .where((s) => s.trim().isNotEmpty && s.trim().length > 10)
+          .where((s) => s.trim().isNotEmpty)
           .toList();
       
       if (sentences.length >= 2) {
-        // Return only first 2 sentences for brief answers
         return sentences.take(2).join(' ');
-      }
-      return answer; // Return as is if can't split
-    }
-
-    // For normal (non-brief) requests, format longer answers as bullet points
-    
-    // Try to split by numbered lists first (e.g., "1.", "2.", etc.)
-    if (answer.contains(RegExp(r'\d+\.\s'))) {
-      final parts = answer.split(RegExp(r'(?=\d+\.\s)'))
-          .where((s) => s.trim().isNotEmpty)
-          .toList();
-      if (parts.length >= 2) {
-        return parts.map((p) {
-          // Remove the number and replace with bullet
-          return '• ${p.replaceFirst(RegExp(r'^\d+\.\s*'), '').trim()}';
-        }).join('\n\n');
-      }
-    }
-
-    // Split by sentence delimiters (period, exclamation, question mark)
-    final sentences = answer
-        .split(RegExp(r'(?<=[.!?])\s+'))
-        .where((s) => s.trim().isNotEmpty && s.trim().length > 10)
-        .toList();
-    
-    // If we have multiple sentences (2 or more for longer text), format as bullet points
-    if (sentences.length >= 2 && answer.length > 150) {
-      return sentences.map((s) {
-        // Clean up the sentence
-        String cleaned = s.trim();
-        // Don't add extra period if already ends with punctuation
-        if (!cleaned.endsWith('.') && !cleaned.endsWith('!') && !cleaned.endsWith('?')) {
-          cleaned = '$cleaned.';
-        }
-        return '• $cleaned';
-      }).join('\n\n');
-    }
-
-    // For medium length answers, try to split by semicolons, colons, or commas
-    if (answer.contains(';') || answer.contains(':')) {
-      final parts = answer.split(RegExp(r'[;:]'))
-          .where((p) => p.trim().isNotEmpty && p.trim().length > 15)
-          .toList();
-      if (parts.length >= 3) {
-        return parts.map((p) => '• ${p.trim()}').join('\n\n');
-      }
-    }
-
-    // Try splitting by "and" or "or" for lists
-    if (answer.length > 200 && (answer.split(', and ').length > 2 || answer.split(', or ').length > 2)) {
-      final parts = answer.split(RegExp(r',\s*(?:and|or)\s*'))
-          .where((p) => p.trim().isNotEmpty && p.trim().length > 10)
-          .toList();
-      if (parts.length >= 3) {
-        return parts.map((p) => '• ${p.trim()}').join('\n\n');
-      }
-    }
-
-    // If answer is very long (more than 300 chars), try to break into paragraphs
-    if (answer.length > 300) {
-      final paragraphs = answer.split('\n')
-          .where((p) => p.trim().isNotEmpty && p.trim().length > 20)
-          .toList();
-      if (paragraphs.length >= 2) {
-        return paragraphs.map((p) => '• ${p.trim()}').join('\n\n');
       }
     }
 
@@ -362,6 +278,7 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
     final greetings = ['hello', 'hi', 'hey', 'greetings', 'good morning', 'good afternoon', 'good evening', 'howdy', 'hii', 'hiii', 'hlo'];
     final howAreYou = ['how are you', 'how r u', 'how are u', 'how r you', 'whatsup', 'what\'s up', 'sup', 'wassup'];
     final thanks = ['thank you', 'thanks', 'thank u', 'thnx', 'thankyou', 'ty'];
+    final helpRequests = ['help', 'help me', 'i need help', 'can you help me', 'assist me', 'can you help', 'what can you do', 'what can you help me with', 'how can you help'];
     
     if (greetings.any((g) => lowerQuestion == g || lowerQuestion.startsWith('$g ') || lowerQuestion.startsWith('$g!'))) {
       setState(() {
@@ -399,118 +316,46 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
       return;
     }
 
+    if (helpRequests.any((h) => lowerQuestion == h || lowerQuestion == '$h!' || lowerQuestion == '$h?')) {
+      setState(() {
+        _messages.add(ChatMessage(
+          text: 'I am here to help you! 🎓\n\nYou can ask me about:\n• University regulations and policies\n• Calculating grades, marks, and CGPA\n• Rules for exams and attendance\n• General academic queries\n\nWhat do you need assistance with today?',
+          isUser: false,
+        ));
+        _isLoading = false;
+      });
+      _scrollToBottom();
+      return;
+    }
+
     final api = Provider.of<AuthProvider>(context, listen: false).api;
     
     try {
-      // Detect if this is a calculation question
-      final calculationKeywords = ['calculate', 'computation', 'compute', 'find', 'determine', 'what is my', 'how much'];
-      final academicKeywords = ['marks', 'grade', 'attendance', 'percentage', 'cgpa', 'gpa', 'score', 'internal', 'external'];
-      
-      final isCalculationQuestion = calculationKeywords.any((kw) => lowerQuestion.contains(kw)) && 
-                                     academicKeywords.any((kw) => lowerQuestion.contains(kw));
-      
-      // Enhance question for calculation requests to guide AI properly
-      String questionToSend = question;
-      if (isCalculationQuestion) {
-        // Keep this very short to stay under 500-char API limit
-        questionToSend =
-        '$question. Use the university regulation documents to calculate this and give only the final answer. Do not show formulas or steps.';
-      }
-      
-      // Send question to API
-      final res = await api.askQuestion(question: questionToSend);
+      // Send question to API as is, allowing the AI to calculate and explain naturally.
+      final res = await api.askQuestion(question: question);
       final rawAnswer =
-          res['answer']?.toString() ?? res['data']?.toString() ?? 'No answer';
+          res['answer']?.toString() ?? res['data']?.toString() ?? 'I could not find an answer to that.';
       
-      // AGGRESSIVELY clean up the raw answer - remove ALL chunk markers and metadata
       String cleanedAnswer = rawAnswer.trim();
 
-      // Remove mathematical formulas (lines containing = with numbers/variables) if any sneak through
-      if (isCalculationQuestion) {
-        cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'\n[^.!?\n]*=[^.!?\n]*\n', caseSensitive: false), '\n');
-        cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'\([^)]*=[^)]*\)', caseSensitive: false), '');
-        cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'[A-Za-z\s]+\s*=\s*\([^)]+\)\s*[*xX]\s*\d+', caseSensitive: false), '');
-      }
-      
-      // Remove ONLY the metadata phrases, NOT the entire content/calculations
-      // This preserves marks calculation, attendance formulas, and grade explanations
-      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'(based on|according to|as per|from|using|in|of)\s+(the\s+)?(uploaded\s+)?(regulation|document|file|pdf|text)s?', caseSensitive: false), '');
-      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'(the\s+)?(uploaded\s+)(regulation|document|file|pdf)s?', caseSensitive: false), '');
-      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'answer from (this|the|a)\s+(regulation|document|file|pdf)', caseSensitive: false), '');
-      
-      // Remove introductory phrases that mention source documents
-      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'^[^.!?]*(uploaded|regulation\s+document)[^.!?]*[:.]\s*', caseSensitive: false), '');
-      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'(let me|i will|i can)\s+(check|refer to|look at|use)\s+(the\s+)?(uploaded|regulation|document)[^.!?]*[:.]\s*', caseSensitive: false), '');
-      
-      // AGGRESSIVE chunk removal - removes patterns like "chunk_88", "chunksa_26 and 104, 105, 138", "chunks_92 and 103"
-      // This regex captures the entire sequence including comma/and-separated numbers
-      cleanedAnswer = cleanedAnswer.replaceAll(
-        RegExp(r'chunks?\w*[_\s]*\d+(?:\s*(?:,|and)\s*\d+)*', caseSensitive: false),
-        '',
-      );
-      
-      // Remove any [bracketed] metadata or markers
+      // Clean up common AI / RAG engine artifacts
+      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'chunks?\w*[_\s]*\d+(?:\s*(?:,|and)\s*\d+)*', caseSensitive: false), '');
       cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'\[[^\]]*chunk[^\]]*\]', caseSensitive: false), '');
       cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'\[[^\]]*source[^\]]*\]', caseSensitive: false), '');
       cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'\[[^\]]*ref[^\]]*\]', caseSensitive: false), '');
-      
-      // Remove {json} artifacts and metadata
       cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'\{[^\}]*chunk[^\}]*\}', caseSensitive: false), '');
       cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'\{[^\}]*source[^\}]*\}', caseSensitive: false), '');
-      
-      // Remove "Source:", "Reference:", "Citation:" metadata
       cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'(source|reference|citation|ref)[:\s]+[^\n]*', caseSensitive: false), '');
+
+      // Remove introductory filler phrases that mention documents
+      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'(based on|according to|as per|from|using|in|of)\s+(the\s+)?(uploaded\s+)?(regulation|document|file|pdf|text)s?', caseSensitive: false), '');
+      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'(the\s+)?(uploaded\s+)(regulation|document|file|pdf)s?', caseSensitive: false), '');
+      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'answer from (this|the|a)\s+(regulation|document|file|pdf)', caseSensitive: false), '');
+      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'^[^.!?]*(uploaded|regulation\s+document)[^.!?]*[:.]\s*', caseSensitive: false), '');
       
-      // Clean up extra whitespace, newlines, and punctuation artifacts
-      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'\n{3,}'), '\n\n'); // Normalize newlines
-      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'\s{2,}'), ' '); // Normalize spaces
-      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'^[,;:\s]+'), ''); // Remove leading punctuation
-      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'[,;\s]+$'), ''); // Remove trailing punctuation
       cleanedAnswer = cleanedAnswer.trim();
-
-      // If backend could not calculate percentage from context, try to calculate locally from user data
-      final lowerAnswer = cleanedAnswer.toLowerCase();
-      if (lowerAnswer.contains('cannot calculate your percentage based on the provided context') ||
-          lowerAnswer.contains('no specific information about your grades, marks, or relevant data in the passages')) {
-        // Try to extract numbers from the original question
-        final lowerQuestion = question.toLowerCase();
-        final numberMatches = RegExp(r'\d+\.?\d*').allMatches(question).toList();
-
-        if (numberMatches.length >= 2) {
-          final nums = numberMatches
-              .map((m) => double.tryParse(m.group(0)!) ?? 0)
-              .toList();
-          final first = nums[0];
-          final second = nums[1] == 0 ? 1 : nums[1];
-
-          // Decide what to calculate based on keywords
-          String resultText;
-          if (lowerQuestion.contains('attendance')) {
-            final pct = (first / second * 100).toStringAsFixed(2);
-            resultText = 'Your attendance percentage is $pct%';
-          } else if (lowerQuestion.contains('mark') || lowerQuestion.contains('score') || lowerQuestion.contains('grade')) {
-            final pct = (first / second * 100).toStringAsFixed(2);
-            resultText = 'Your marks percentage is $pct%';
-          } else if (lowerQuestion.contains('cgpa') || lowerQuestion.contains('gpa')) {
-            final avg = nums.reduce((a, b) => a + b) / nums.length;
-            resultText = 'Your CGPA is ${avg.toStringAsFixed(2)}';
-          } else {
-            final pct = (first / second * 100).toStringAsFixed(2);
-            resultText = 'The percentage is $pct%';
-          }
-
-          cleanedAnswer = resultText;
-        } else {
-          // Fallback: ask user to provide data in a clear format
-          cleanedAnswer =
-              'To calculate your percentage, I need your details. Please type it like:\n\n'
-              '- Calculate marks 420 out of 500\n'
-              '- Calculate attendance 45 out of 60\n'
-              '- Calculate CGPA 8.5 9.0 8.0 7.5';
-        }
-      }
       
-      // Format the answer based on question context (brief vs detailed)
+      // Format the answer
       final formattedAnswer = _formatAnswer(cleanedAnswer, question);
       
       setState(() {
@@ -814,7 +659,7 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
                 const SizedBox(width: 8),
                 CircleAvatar(
                   backgroundColor: _isListening
-                      ? const Color(0xFF03045E)
+                      ? Theme.of(context).colorScheme.secondary
                       : Theme.of(context).colorScheme.primary,
                   child: IconButton(
                     icon: Icon(_isListening ? Icons.mic_off : Icons.mic, color: Colors.white),
@@ -900,7 +745,7 @@ class _ChatBubble extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 color: message.isUser
-                    ? const Color(0xFF003049)
+                    ? Theme.of(context).colorScheme.primary
                     : Colors.white,
                 borderRadius: BorderRadius.only(
                   topLeft: const Radius.circular(20),
@@ -926,7 +771,7 @@ class _ChatBubble extends StatelessWidget {
           if (message.isUser) const SizedBox(width: 8),
           if (message.isUser)
             CircleAvatar(
-              backgroundColor: const Color(0xFF003049),
+              backgroundColor: Theme.of(context).colorScheme.primary,
               radius: 16,
               child: const Icon(Icons.person, size: 18, color: Colors.white),
             ),
@@ -945,7 +790,7 @@ class _LoadingBubble extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CircleAvatar(
-            backgroundColor: const Color(0xFF669bbc),
+            backgroundColor: Theme.of(context).colorScheme.secondary,
             radius: 16,
             child: const Icon(Icons.smart_toy, size: 18, color: Colors.white),
           ),

@@ -212,7 +212,7 @@ class _MarkCalculatorScreenState extends State<MarkCalculatorScreen> {
                     child: ElevatedButton(
                       onPressed: _calculateMarks,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFc1121f),
+                        backgroundColor: Theme.of(context).colorScheme.primary,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(

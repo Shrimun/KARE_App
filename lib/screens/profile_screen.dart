@@ -13,16 +13,16 @@ class ProfileScreen extends StatelessWidget {
     final padding = size.width * 0.06;
     
     return Scaffold(
-      backgroundColor: const Color(0xFFfdf0d5),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFfdf0d5),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
-        title: const Text(
+        title: Text(
           'Profile',
-          style: TextStyle(color: Color(0xFF003049)),
+          style: TextStyle(color: Theme.of(context).colorScheme.primary),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF003049)),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.primary),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),

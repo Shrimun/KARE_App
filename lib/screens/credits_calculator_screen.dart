@@ -76,9 +76,9 @@ class _CreditsCalculatorScreenState extends State<CreditsCalculatorScreen> {
     final padding = size.width * 0.06;
     
     return Scaffold(
-      backgroundColor: const Color(0xFFfdf0d5),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFfdf0d5),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),

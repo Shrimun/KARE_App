@@ -302,8 +302,8 @@ class _CgpaCalculatorScreenState extends State<CgpaCalculatorScreen> {
                       const SizedBox(height: 16),
                       Text(
                         _cgpa!.toStringAsFixed(2),
-                        style: const TextStyle(
-                          color: Color(0xFF003049),
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
                           fontSize: 48,
                           fontWeight: FontWeight.bold,
                         ),
