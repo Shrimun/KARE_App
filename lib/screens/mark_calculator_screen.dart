@@ -105,9 +105,9 @@ class _MarkCalculatorScreenState extends State<MarkCalculatorScreen> {
     final padding = size.width * 0.06;
     
     return Scaffold(
-      backgroundColor: const Color(0xFFfdf0d5),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFfdf0d5),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -272,8 +272,8 @@ class _MarkCalculatorScreenState extends State<MarkCalculatorScreen> {
                       const SizedBox(height: 16),
                       Text(
                         '${_percentage!.toStringAsFixed(2)}%',
-                        style: const TextStyle(
-                          color: Color(0xFF003049),
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
                           fontSize: 48,
                           fontWeight: FontWeight.bold,
                         ),

@@ -59,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final padding = size.width * 0.06;
     
     return Scaffold(
-      backgroundColor: const Color(0xFFfdf0d5),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: auth.isLoading
           ? const Center(child: LoadingWidget())
           : SafeArea(
@@ -76,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF003049),
+                          color: Color(0xFF023E8A),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -131,7 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ElevatedButton(
                         onPressed: _submit,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFc1121f),
+                          backgroundColor: Theme.of(context).colorScheme.primary,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
@@ -191,7 +191,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: const Text(
                               'Sign Up',
                               style: TextStyle(
-                                color: Color(0xFFc1121f),
+                                color: Color(0xFF023E8A),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),

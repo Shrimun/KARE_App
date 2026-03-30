@@ -128,7 +128,7 @@ class _SignupScreenState extends State<SignupScreen> {
     final padding = size.width * 0.06;
     
     return Scaffold(
-      backgroundColor: const Color(0xFFfdf0d5),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: auth.isLoading
           ? const Center(child: LoadingWidget())
           : SafeArea(
@@ -221,6 +221,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           ? const Center(child: CircularProgressIndicator())
                           : DropdownButtonFormField<String>(
                               value: _selectedDepartmentCode,
+                              isExpanded: true,
                               decoration: InputDecoration(
                                 labelText: 'Department',
                                 labelStyle: const TextStyle(color: Colors.black54),
@@ -275,7 +276,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       ElevatedButton(
                         onPressed: _submit,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFc1121f),
+                          backgroundColor: Theme.of(context).colorScheme.primary,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(

@@ -92,9 +92,9 @@ class _CgpaCalculatorScreenState extends State<CgpaCalculatorScreen> {
     final padding = size.width * 0.06;
     
     return Scaffold(
-      backgroundColor: const Color(0xFFfdf0d5),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFfdf0d5),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -242,7 +242,7 @@ class _CgpaCalculatorScreenState extends State<CgpaCalculatorScreen> {
                     child: ElevatedButton(
                       onPressed: _calculateCGPA,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFc1121f),
+                        backgroundColor: Theme.of(context).colorScheme.primary,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(

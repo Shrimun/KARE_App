@@ -41,8 +41,14 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
     _initTts();
   }
 
-  void _initSpeech() async {
+  Future<void> _initSpeech() async {
     try {
+      // Request microphone permission first
+      var status = await Permission.microphone.status;
+      if (!status.isGranted) {
+        status = await Permission.microphone.request();
+      }
+      
       _speechEnabled = await _speech.initialize(
         onStatus: (status) {
           debugPrint('Speech status: $status');
@@ -51,8 +57,10 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
             setState(() => _isListening = false);
             // Auto-submit after voice input completes
             if (wasListening && _questionCtrl.text.trim().isNotEmpty && _voiceActive) {
-              Future.delayed(const Duration(milliseconds: 500), () {
-                _submit();
+              Future.delayed(const Duration(milliseconds: 800), () {
+                if (_questionCtrl.text.trim().isNotEmpty) {
+                  _submit();
+                }
               });
             }
           }
@@ -60,6 +68,11 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
         onError: (val) {
           debugPrint('Speech error: $val');
           setState(() => _isListening = false);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Voice error: ${val.errorMsg}')),
+            );
+          }
         },
       );
       debugPrint('Speech initialized: $_speechEnabled');
@@ -81,7 +94,7 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
 
   void _listen() async {
     if (!_isListening) {
-      // Request microphone permission
+      // Check microphone permission
       var status = await Permission.microphone.status;
       debugPrint('Microphone permission status: $status');
       
@@ -91,54 +104,77 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
         if (!status.isGranted) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Microphone permission denied')),
+              const SnackBar(
+                content: Text('Microphone permission is required for voice input'),
+                duration: Duration(seconds: 3),
+              ),
             );
           }
           return;
         }
       }
 
-      if (_speechEnabled) {
-        setState(() {
-          _isListening = true;
-          _voiceActive = true;
-        });
-        _questionCtrl.clear();
-        await _flutterTts.stop();
-        
-        try {
-          await _speech.listen(
-            onResult: (val) {
-              debugPrint('Speech result: ${val.recognizedWords}');
+      // Check if speech is available
+      if (!_speechEnabled) {
+        await _initSpeech();
+        if (!_speechEnabled) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Speech recognition is not available on this device'),
+                duration: Duration(seconds: 3),
+              ),
+            );
+          }
+          return;
+        }
+      }
+
+      setState(() {
+        _isListening = true;
+        _voiceActive = true;
+      });
+      _questionCtrl.clear();
+      await _flutterTts.stop();
+      
+      try {
+        await _speech.listen(
+          onResult: (val) {
+            debugPrint('Speech result: ${val.recognizedWords}');
+            if (mounted) {
               setState(() {
                 _questionCtrl.text = val.recognizedWords;
               });
-            },
-            listenFor: const Duration(seconds: 60),
-            pauseFor: const Duration(seconds: 10),
-            partialResults: true,
-            cancelOnError: true,
-            listenMode: stt.ListenMode.confirmation,
-          );
-        } catch (e) {
-          debugPrint('Listen error: $e');
-          setState(() => _isListening = false);
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error: $e')),
-            );
-          }
-        }
-      } else {
+            }
+          },
+          listenFor: const Duration(seconds: 60),
+          pauseFor: const Duration(seconds: 8),
+          partialResults: true,
+          cancelOnError: true,
+          listenMode: stt.ListenMode.confirmation,
+        );
+      } catch (e) {
+        debugPrint('Listen error: $e');
+        setState(() {
+          _isListening = false;
+          _voiceActive = false;
+        });
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Speech recognition not available')),
+            SnackBar(
+              content: Text('Voice input error. Please try again.'),
+              duration: Duration(seconds: 2),
+            ),
           );
         }
       }
     } else {
-      setState(() => _isListening = false);
-      _speech.stop();
+      // Stop listening
+      setState(() {
+        _isListening = false;
+        _voiceActive = false;
+      });
+      await _speech.stop();
     }
   }
 
@@ -366,33 +402,45 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
     final api = Provider.of<AuthProvider>(context, listen: false).api;
     
     try {
-      // Send question directly to avoid 500 character limit
-      final res = await api.askQuestion(question: question);
+      // Detect if this is a calculation question
+      final calculationKeywords = ['calculate', 'computation', 'compute', 'find', 'determine', 'what is my', 'how much'];
+      final academicKeywords = ['marks', 'grade', 'attendance', 'percentage', 'cgpa', 'gpa', 'score', 'internal', 'external'];
+      
+      final isCalculationQuestion = calculationKeywords.any((kw) => lowerQuestion.contains(kw)) && 
+                                     academicKeywords.any((kw) => lowerQuestion.contains(kw));
+      
+      // Enhance question for calculation requests to guide AI properly
+      String questionToSend = question;
+      if (isCalculationQuestion) {
+        // Keep this very short to stay under 500-char API limit
+        questionToSend =
+        '$question. Use the university regulation documents to calculate this and give only the final answer. Do not show formulas or steps.';
+      }
+      
+      // Send question to API
+      final res = await api.askQuestion(question: questionToSend);
       final rawAnswer =
           res['answer']?.toString() ?? res['data']?.toString() ?? 'No answer';
       
       // AGGRESSIVELY clean up the raw answer - remove ALL chunk markers and metadata
       String cleanedAnswer = rawAnswer.trim();
+
+      // Remove mathematical formulas (lines containing = with numbers/variables) if any sneak through
+      if (isCalculationQuestion) {
+        cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'\n[^.!?\n]*=[^.!?\n]*\n', caseSensitive: false), '\n');
+        cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'\([^)]*=[^)]*\)', caseSensitive: false), '');
+        cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'[A-Za-z\s]+\s*=\s*\([^)]+\)\s*[*xX]\s*\d+', caseSensitive: false), '');
+      }
       
-      // Remove ALL references to uploaded files, regulations, and documents
-      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'uploaded\s+(regulation|regulations|file|files|document|documents)', caseSensitive: false), '');
-      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'the\s+uploaded\s+(regulation|regulations|file|files|document|documents)', caseSensitive: false), '');
-      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'from\s+uploaded\s+(regulation|regulations|file|files|document|documents)', caseSensitive: false), '');
-      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'(using|based on|according to|as per)\s+uploaded\s+(regulation|regulations|file|files|document|documents)', caseSensitive: false), '');
+      // Remove ONLY the metadata phrases, NOT the entire content/calculations
+      // This preserves marks calculation, attendance formulas, and grade explanations
+      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'(based on|according to|as per|from|using|in|of)\s+(the\s+)?(uploaded\s+)?(regulation|document|file|pdf|text)s?', caseSensitive: false), '');
+      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'(the\s+)?(uploaded\s+)(regulation|document|file|pdf)s?', caseSensitive: false), '');
+      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'answer from (this|the|a)\s+(regulation|document|file|pdf)', caseSensitive: false), '');
       
-      // Remove phrases like "answer from this pdf", "from the pdf", "from this document" etc.
-      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'answer from (this|the|a|uploaded) (pdf|document|file|text|regulation)', caseSensitive: false), '');
-      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'from (this|the|a|uploaded) (pdf|document|file|text|regulation)', caseSensitive: false), '');
-      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'based on (this|the|a|uploaded) (pdf|document|file|text|regulation)', caseSensitive: false), '');
-      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'according to (this|the|a|uploaded) (pdf|document|file|text|regulation)', caseSensitive: false), '');
-      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'in (this|the|a|uploaded) (pdf|document|file|text|regulation)', caseSensitive: false), '');
-      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'of (this|the|a|uploaded) (pdf|document|file|text|regulation)', caseSensitive: false), '');
-      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'as per (this|the|a|uploaded) (pdf|document|file|text|regulation)', caseSensitive: false), '');
-      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'using (this|the|a|uploaded) (pdf|document|file|text|regulation)', caseSensitive: false), '');
-      
-      // Remove any sentence mentioning "regulation" or "uploaded" documents
-      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'[^.!?]*uploaded[^.!?]*[.!?]', caseSensitive: false), '');
-      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'[^.!?]*regulation\s+document[^.!?]*[.!?]', caseSensitive: false), '');
+      // Remove introductory phrases that mention source documents
+      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'^[^.!?]*(uploaded|regulation\s+document)[^.!?]*[:.]\s*', caseSensitive: false), '');
+      cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'(let me|i will|i can)\s+(check|refer to|look at|use)\s+(the\s+)?(uploaded|regulation|document)[^.!?]*[:.]\s*', caseSensitive: false), '');
       
       // AGGRESSIVE chunk removal - removes patterns like "chunk_88", "chunksa_26 and 104, 105, 138", "chunks_92 and 103"
       // This regex captures the entire sequence including comma/and-separated numbers
@@ -419,6 +467,48 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
       cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'^[,;:\s]+'), ''); // Remove leading punctuation
       cleanedAnswer = cleanedAnswer.replaceAll(RegExp(r'[,;\s]+$'), ''); // Remove trailing punctuation
       cleanedAnswer = cleanedAnswer.trim();
+
+      // If backend could not calculate percentage from context, try to calculate locally from user data
+      final lowerAnswer = cleanedAnswer.toLowerCase();
+      if (lowerAnswer.contains('cannot calculate your percentage based on the provided context') ||
+          lowerAnswer.contains('no specific information about your grades, marks, or relevant data in the passages')) {
+        // Try to extract numbers from the original question
+        final lowerQuestion = question.toLowerCase();
+        final numberMatches = RegExp(r'\d+\.?\d*').allMatches(question).toList();
+
+        if (numberMatches.length >= 2) {
+          final nums = numberMatches
+              .map((m) => double.tryParse(m.group(0)!) ?? 0)
+              .toList();
+          final first = nums[0];
+          final second = nums[1] == 0 ? 1 : nums[1];
+
+          // Decide what to calculate based on keywords
+          String resultText;
+          if (lowerQuestion.contains('attendance')) {
+            final pct = (first / second * 100).toStringAsFixed(2);
+            resultText = 'Your attendance percentage is $pct%';
+          } else if (lowerQuestion.contains('mark') || lowerQuestion.contains('score') || lowerQuestion.contains('grade')) {
+            final pct = (first / second * 100).toStringAsFixed(2);
+            resultText = 'Your marks percentage is $pct%';
+          } else if (lowerQuestion.contains('cgpa') || lowerQuestion.contains('gpa')) {
+            final avg = nums.reduce((a, b) => a + b) / nums.length;
+            resultText = 'Your CGPA is ${avg.toStringAsFixed(2)}';
+          } else {
+            final pct = (first / second * 100).toStringAsFixed(2);
+            resultText = 'The percentage is $pct%';
+          }
+
+          cleanedAnswer = resultText;
+        } else {
+          // Fallback: ask user to provide data in a clear format
+          cleanedAnswer =
+              'To calculate your percentage, I need your details. Please type it like:\n\n'
+              '- Calculate marks 420 out of 500\n'
+              '- Calculate attendance 45 out of 60\n'
+              '- Calculate CGPA 8.5 9.0 8.0 7.5';
+        }
+      }
       
       // Format the answer based on question context (brief vs detailed)
       final formattedAnswer = _formatAnswer(cleanedAnswer, question);
@@ -445,7 +535,7 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
   void _showAttachmentOptions() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFFfdf0d5),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -454,19 +544,19 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
+            Text(
               'Add Attachment',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF003049),
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
             const SizedBox(height: 20),
             ListTile(
-              leading: const CircleAvatar(
-                backgroundColor: Color(0xFF669bbc),
-                child: Icon(Icons.insert_drive_file, color: Colors.white),
+              leading: CircleAvatar(
+                backgroundColor: Theme.of(context).colorScheme.secondary,
+                child: const Icon(Icons.insert_drive_file, color: Colors.white),
               ),
               title: const Text('File'),
               onTap: () {
@@ -477,9 +567,9 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
               },
             ),
             ListTile(
-              leading: const CircleAvatar(
-                backgroundColor: Color(0xFF669bbc),
-                child: Icon(Icons.image, color: Colors.white),
+              leading: CircleAvatar(
+                backgroundColor: Theme.of(context).colorScheme.secondary,
+                child: const Icon(Icons.image, color: Colors.white),
               ),
               title: const Text('Image'),
               onTap: () {
@@ -490,9 +580,9 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
               },
             ),
             ListTile(
-              leading: const CircleAvatar(
-                backgroundColor: Color(0xFF669bbc),
-                child: Icon(Icons.camera_alt, color: Colors.white),
+              leading: CircleAvatar(
+                backgroundColor: Theme.of(context).colorScheme.secondary,
+                child: const Icon(Icons.camera_alt, color: Colors.white),
               ),
               title: const Text('Camera'),
               onTap: () {
@@ -516,15 +606,15 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
     
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: const Color(0xFFfdf0d5),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       drawer: Drawer(
         child: Container(
-          color: const Color(0xFFfdf0d5),
+          color: Theme.of(context).scaffoldBackgroundColor,
           child: Column(
             children: [
               DrawerHeader(
-                decoration: const BoxDecoration(
-                  color: Color(0xFF003049),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary,
                 ),
                 child: const Center(
                   child: Column(
@@ -551,7 +641,7 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
                   icon: const Icon(Icons.add),
                   label: const Text('New Chat'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFc1121f),
+                    backgroundColor: Theme.of(context).colorScheme.primary,
                     foregroundColor: Colors.white,
                     minimumSize: const Size(double.infinity, 48),
                   ),
@@ -575,7 +665,7 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
                           final chat = _chatHistory[index];
                           return ListTile(
                             leading: CircleAvatar(
-                              backgroundColor: const Color(0xFF669bbc),
+                              backgroundColor: Theme.of(context).colorScheme.secondary,
                               child: Text(
                                 '${index + 1}',
                                 style: const TextStyle(color: Colors.white),
@@ -586,7 +676,7 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
-                                color: Color(0xFF003049),
+                                color: Colors.black87,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -612,17 +702,17 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
         ),
       ),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFfdf0d5),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.menu, color: Color(0xFF003049)),
+          icon: Icon(Icons.menu, color: Theme.of(context).colorScheme.primary),
           onPressed: () {
             _scaffoldKey.currentState?.openDrawer();
           },
         ),
-        title: const Text(
+        title: Text(
           'AI Assistant',
-          style: TextStyle(color: Color(0xFF003049)),
+          style: TextStyle(color: Theme.of(context).colorScheme.primary),
         ),
       ),
       body: Column(
@@ -637,7 +727,7 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
                           width: size.width * 0.3,
                           height: size.width * 0.3,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF003049),
+                            color: Theme.of(context).colorScheme.primary,
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -673,7 +763,7 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
           ),
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Colors.white.withOpacity(0.96),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black12,
@@ -686,7 +776,7 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
             child: Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: const Color(0xFF669bbc),
+                  backgroundColor: Theme.of(context).colorScheme.secondary,
                   child: IconButton(
                     icon: const Icon(Icons.add, color: Colors.white),
                     onPressed: _showAttachmentOptions,
@@ -698,12 +788,16 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
                     controller: _questionCtrl,
                     decoration: InputDecoration(
                       hintText: 'Type your question...',
-                      hintStyle: TextStyle(color: const Color(0xFF003049).withOpacity(0.5)),
+                      hintStyle: TextStyle(
+                        color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                      ),
                       filled: true,
-                      fillColor: const Color(0xFFfdf0d5),
+                      fillColor: Colors.white,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(25),
-                        borderSide: BorderSide.none,
+                        borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.25),
+                        ),
                       ),
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 20,
@@ -719,7 +813,9 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
                 ),
                 const SizedBox(width: 8),
                 CircleAvatar(
-                  backgroundColor: _isListening ? const Color(0xFF780000) : const Color(0xFFc1121f),
+                  backgroundColor: _isListening
+                      ? const Color(0xFF03045E)
+                      : Theme.of(context).colorScheme.primary,
                   child: IconButton(
                     icon: Icon(_isListening ? Icons.mic_off : Icons.mic, color: Colors.white),
                     onPressed: _listen,
@@ -727,7 +823,7 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
                 ),
                 const SizedBox(width: 8),
                 CircleAvatar(
-                  backgroundColor: const Color(0xFFc1121f),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                   child: IconButton(
                     icon: const Icon(Icons.send, color: Colors.white),
                     onPressed: _submit,
@@ -794,7 +890,7 @@ class _ChatBubble extends StatelessWidget {
         children: [
           if (!message.isUser)
             CircleAvatar(
-              backgroundColor: const Color(0xFF669bbc),
+              backgroundColor: Theme.of(context).colorScheme.secondary,
               radius: 16,
               child: const Icon(Icons.smart_toy, size: 18, color: Colors.white),
             ),
@@ -846,7 +942,6 @@ class _LoadingBubble extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CircleAvatar(
@@ -859,20 +954,27 @@ class _LoadingBubble extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: const Radius.circular(20),
-                topRight: const Radius.circular(20),
-                bottomLeft: const Radius.circular(4),
-                bottomRight: const Radius.circular(20),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+                bottomLeft: Radius.circular(4),
+                bottomRight: Radius.circular(20),
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
-              children: [
+              children: const [
                 _DotAnimation(delay: 0),
-                const SizedBox(width: 4),
+                SizedBox(width: 4),
                 _DotAnimation(delay: 200),
-                const SizedBox(width: 4),
+                SizedBox(width: 4),
                 _DotAnimation(delay: 400),
               ],
             ),
@@ -930,7 +1032,7 @@ class _DotAnimationState extends State<_DotAnimation>
         width: 8,
         height: 8,
         decoration: BoxDecoration(
-          color: const Color(0xFF669bbc).withOpacity(0.7),
+          color: Theme.of(context).colorScheme.secondary.withOpacity(0.7),
           shape: BoxShape.circle,
         ),
       ),

@@ -9,9 +9,9 @@ class RulesScreen extends StatelessWidget {
     final padding = size.width * 0.06;
     
     return Scaffold(
-      backgroundColor: const Color(0xFFfdf0d5),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFfdf0d5),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -28,6 +28,7 @@ class RulesScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildRuleSection(
+              context,
               'Academic Regulations',
               [
                 'Students must maintain a minimum of 75% attendance in all subjects.',
@@ -38,6 +39,7 @@ class RulesScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             _buildRuleSection(
+              context,
               'Dress Code',
               [
                 'Students must wear their ID cards at all times on campus.',
@@ -47,6 +49,7 @@ class RulesScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             _buildRuleSection(
+              context,
               'Library Rules',
               [
                 'Silence must be maintained in the library premises.',
@@ -57,6 +60,7 @@ class RulesScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             _buildRuleSection(
+              context,
               'Hostel Regulations',
               [
                 'Hostel curfew timings must be strictly followed.',
@@ -67,6 +71,7 @@ class RulesScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             _buildRuleSection(
+              context,
               'Disciplinary Code',
               [
                 'Use of mobile phones is restricted in classrooms.',
@@ -81,7 +86,7 @@ class RulesScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRuleSection(String title, List<String> rules) {
+  Widget _buildRuleSection(BuildContext context, String title, List<String> rules) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -100,8 +105,8 @@ class RulesScreen extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(
-              color: Color(0xFFc1121f),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.primary,
               fontSize: 18,
               fontWeight: FontWeight.w600,
             ),

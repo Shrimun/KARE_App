@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -15,7 +17,7 @@ class HomeScreen extends StatelessWidget {
     final padding = size.width * 0.05;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFfdf0d5),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.all(padding),
@@ -27,65 +29,82 @@ class HomeScreen extends StatelessWidget {
                 onTap: () => Navigator.of(context).pushNamed('/profile'),
                 child: CircleAvatar(
                   radius: isSmallDevice ? 18 : 20,
-                  backgroundColor: const Color(0xFF669bbc),
+                  backgroundColor: Theme.of(context).colorScheme.secondary,
                   child: Icon(Icons.person, color: Colors.white, size: isSmallDevice ? 20 : 24),
                 ),
               ),
               SizedBox(height: size.height * 0.03),
               
-              // Welcome Circle with gradient
+              // Welcome Circle with glass effect
               Center(
                 child: GestureDetector(
                   onTap: () => Navigator.of(context).pushNamed('/ask'),
-                  child: Container(
-                    width: size.width * 0.6,
-                    height: size.width * 0.6,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF003049),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 20,
-                          spreadRadius: -9,
-                          offset: const Offset(-2, -6),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Hi, ${user?.name ?? 'Jarvis'} 👋',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: isSmallDevice ? 14 : 16,
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w400,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(size.width * 0.3),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                      child: Container(
+                        width: size.width * 0.6,
+                        height: size.width * 0.6,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.white.withOpacity(0.35),
+                              Theme.of(context).colorScheme.primary.withOpacity(0.55),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
                           ),
-                        ),
-                        SizedBox(height: isSmallDevice ? 4 : 8),
-                        Text(
-                          'Tap to chat',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: isSmallDevice ? 18 : 20,
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w500,
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.6),
+                            width: 1.8,
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.12),
+                              blurRadius: 25,
+                              spreadRadius: -8,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
                         ),
-                      ],
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Hi, ${user?.name ?? 'Jarvis'} 👋',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: isSmallDevice ? 14 : 16,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                            SizedBox(height: isSmallDevice ? 4 : 8),
+                            Text(
+                              'Tap to chat',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: isSmallDevice ? 18 : 20,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
-              SizedBox(height: size.height * 0.04),
-              
+              SizedBox(height: size.height * 0.08),
+
               // Explore Section
               Text(
                 'Explore',
                 style: TextStyle(
-                  color: const Color(0xFF003049),
+                  color: Theme.of(context).colorScheme.primary,
                   fontSize: isSmallDevice ? 20 : 24,
                   fontFamily: 'Poppins',
                   fontWeight: FontWeight.w600,
@@ -93,49 +112,37 @@ class HomeScreen extends StatelessWidget {
               ),
               SizedBox(height: size.height * 0.02),
               
-              // Grid of Cards
-              Expanded(
-                child: GridView.count(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: size.width * 0.04,
-                  crossAxisSpacing: size.width * 0.05,
-                  childAspectRatio: isSmallDevice ? 1.0 : 1.15,
-                  children: [
-                    _ExploreCard(
-                      title: 'Rules and\nRegulations',
-                      color: const Color(0xFFc1121f),
-                      icon: Icons.book_outlined,
-                      onTap: () => Navigator.of(context).pushNamed('/rules'),
-                    ),
-                    _ExploreCard(
-                      title: 'SIS Login',
-                      color: const Color(0xFF669bbc),
-                      icon: Icons.language,
-                      onTap: () async {
-                        final url = Uri.parse('https://sis.kalasalingam.ac.in/login');
-                        if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Could not launch SIS website')),
-                            );
-                          }
+              // Grid of Cards (content-sized to avoid large empty space)
+              GridView.count(
+                crossAxisCount: 2,
+                mainAxisSpacing: size.width * 0.04,
+                crossAxisSpacing: size.width * 0.05,
+                childAspectRatio: isSmallDevice ? 1.0 : 1.15,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                children: [
+                  _ExploreCard(
+                    title: 'Rules and\nRegulations',
+                    color: Theme.of(context).colorScheme.primary,
+                    icon: Icons.book_outlined,
+                    onTap: () => Navigator.of(context).pushNamed('/rules'),
+                  ),
+                  _ExploreCard(
+                    title: 'SIS Login',
+                    color: Theme.of(context).colorScheme.secondary,
+                    icon: Icons.language,
+                    onTap: () async {
+                      final url = Uri.parse('https://sis.kalasalingam.ac.in/login');
+                      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Could not launch SIS website')),
+                          );
                         }
-                      },
-                    ),
-                    _ExploreCard(
-                      title: 'CGPA\nCalculator',
-                      color: const Color(0xFFc1121f),
-                      icon: Icons.assessment_outlined,
-                      onTap: () => Navigator.of(context).pushNamed('/cgpa-calculator'),
-                    ),
-                    _ExploreCard(
-                      title: 'Credits\nCalculator',
-                      color: const Color(0xFF669bbc),
-                      icon: Icons.school_outlined,
-                      onTap: () => Navigator.of(context).pushNamed('/credits-calculator'),
-                    ),
-                  ],
-                ),
+                      }
+                    },
+                  ),
+                ],
               ),
             ],
           ),

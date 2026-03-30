@@ -121,8 +121,8 @@ class _CreditsCalculatorScreenState extends State<CreditsCalculatorScreen> {
                     ),
                     Text(
                       '$_requiredCredits',
-                      style: const TextStyle(
-                        color: Color(0xFF003049),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
@@ -242,7 +242,7 @@ class _CreditsCalculatorScreenState extends State<CreditsCalculatorScreen> {
                     child: ElevatedButton(
                       onPressed: _calculateCredits,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFc1121f),
+                        backgroundColor: Theme.of(context).colorScheme.primary,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
@@ -304,8 +304,8 @@ class _CreditsCalculatorScreenState extends State<CreditsCalculatorScreen> {
                           ),
                           Text(
                             '$_totalCredits',
-                            style: const TextStyle(
-                              color: Color(0xFF003049),
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary,
                               fontSize: 32,
                               fontWeight: FontWeight.bold,
                             ),
@@ -329,7 +329,7 @@ class _CreditsCalculatorScreenState extends State<CreditsCalculatorScreen> {
                             '$_remainingCredits',
                             style: TextStyle(
                               color: _remainingCredits! > 0
-                                  ? const Color(0xFF669bbc)
+                                  ? Theme.of(context).colorScheme.secondary
                                   : Colors.green, // Completed
                               fontSize: 32,
                               fontWeight: FontWeight.bold,
@@ -341,8 +341,8 @@ class _CreditsCalculatorScreenState extends State<CreditsCalculatorScreen> {
                       LinearProgressIndicator(
                         value: _totalCredits! / _requiredCredits,
                         backgroundColor: Colors.grey[200],
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          Color(0xFF669bbc),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Theme.of(context).colorScheme.secondary,
                         ),
                         minHeight: 8,
                       ),

@@ -43,7 +43,7 @@ class ProfileScreen extends StatelessWidget {
                       children: [
                         CircleAvatar(
                           radius: 60,
-                          backgroundColor: const Color(0xFF669bbc),
+                          backgroundColor: Theme.of(context).colorScheme.secondary,
                           child: Text(
                             user.name.isNotEmpty ? user.name[0].toUpperCase() : 'U',
                             style: const TextStyle(
@@ -56,10 +56,10 @@ class ProfileScreen extends StatelessWidget {
                         const SizedBox(height: 16),
                         Text(
                           user.name,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF003049),
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                         ),
                       ],
@@ -98,7 +98,7 @@ class ProfileScreen extends StatelessWidget {
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFc1121f),
+                        backgroundColor: Theme.of(context).colorScheme.primary,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
@@ -145,12 +145,12 @@ class _ProfileInfoCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFF669bbc).withOpacity(0.1),
+              color: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               icon,
-              color: const Color(0xFF669bbc),
+              color: Theme.of(context).colorScheme.secondary,
               size: 24,
             ),
           ),

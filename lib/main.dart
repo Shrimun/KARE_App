@@ -35,14 +35,15 @@ class MyApp extends StatelessWidget {
         title: 'AI Student Assistant',
         theme: ThemeData(
           brightness: Brightness.light,
-          scaffoldBackgroundColor: const Color(0xFFfdf0d5),
-          primaryColor: const Color(0xFF003049),
+          // New blue color palette
+          scaffoldBackgroundColor: const Color(0xFFCAF0F8),
+          primaryColor: const Color(0xFF0077B6),
           textTheme: GoogleFonts.poppinsTextTheme(ThemeData.light().textTheme),
           colorScheme: ColorScheme.light(
-            primary: const Color(0xFF003049),
-            secondary: const Color(0xFF669bbc),
+            primary: const Color(0xFF0077B6), // 0077B6
+            secondary: const Color(0xFF00B4D8), // 00B4D8
             surface: Colors.white,
-            background: const Color(0xFFfdf0d5),
+            background: const Color(0xFFCAF0F8), // CAF0F8
           ),
           inputDecorationTheme: InputDecorationTheme(
             filled: true,
@@ -59,7 +60,7 @@ class MyApp extends StatelessWidget {
           ),
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFc1121f),
+              backgroundColor: const Color(0xFF0077B6),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
