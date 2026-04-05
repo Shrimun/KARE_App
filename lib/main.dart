@@ -34,6 +34,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider(api: api)),
       ],
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'AI Student Assistant',
         theme: ThemeData(
           brightness: Brightness.light,
