@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import '../providers/auth_provider.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -17,8 +18,16 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _init() async {
+    // Show the splash screen for 4 seconds
+    await Future.delayed(const Duration(seconds: 4));
+    if (!mounted) return;
+
     final auth = Provider.of<AuthProvider>(context, listen: false);
     await auth.tryAutoLogin();
+
+    // Remove the native splash screen just before navigating
+    FlutterNativeSplash.remove();
+
     if (auth.isAuthenticated) {
       Navigator.of(context).pushReplacementNamed('/home');
     } else {
@@ -28,15 +37,9 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: Center(
-        child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(
-            Theme.of(context).colorScheme.primary,
-          ),
-        ),
-      ),
+    // The native splash screen will cover this scaffold seamlessly
+    return const Scaffold(
+      backgroundColor: Colors.white,
     );
   }
 }

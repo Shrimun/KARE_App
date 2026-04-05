@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 import 'services/api_service.dart';
 import 'providers/auth_provider.dart';
@@ -16,7 +17,8 @@ import 'screens/cgpa_calculator_screen.dart';
 import 'screens/credits_calculator_screen.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   final api = ApiService();
   runApp(MyApp(api: api));
 }

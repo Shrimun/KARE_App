@@ -21,9 +21,10 @@ class HomeScreen extends StatelessWidget {
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.all(padding),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               // Profile Icon
               GestureDetector(
                 onTap: () => Navigator.of(context).pushNamed('/profile'),
@@ -33,7 +34,7 @@ class HomeScreen extends StatelessWidget {
                   child: Icon(Icons.person, color: Colors.white, size: isSmallDevice ? 20 : 24),
                 ),
               ),
-              SizedBox(height: size.height * 0.03),
+              SizedBox(height: size.height * 0.12),
               
               // Welcome Circle with glass effect
               Center(
@@ -98,7 +99,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(height: size.height * 0.08),
+              SizedBox(height: size.height * 0.12),
 
               // Explore Section
               Text(
@@ -147,6 +148,7 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }
