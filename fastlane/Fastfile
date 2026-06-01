@@ -1,0 +1,28 @@
+default_platform(:android)
+
+platform :android do
+  desc "Build and optionally upload Android AAB"
+  lane :release do
+    gradle(task: "clean")
+    gradle(task: "bundleRelease")
+    if ENV['JSON_KEY']
+      supply(json_key: ENV['JSON_KEY'], track: ENV['TRACK'] || 'internal')
+    end
+  end
+end
+
+platform :ios do
+  desc "Build and upload to TestFlight"
+  lane :beta do
+    match(type: "appstore", readonly: true)
+    build_app(scheme: "Runner")
+    upload_to_testflight
+  end
+
+  desc "Build and deliver to App Store"
+  lane :release do
+    match(type: "appstore")
+    build_app(scheme: "Runner")
+    deliver(force: true)
+  end
+end

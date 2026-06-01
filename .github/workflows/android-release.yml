@@ -1,0 +1,44 @@
+name: Android Release
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Decode Android keystore
+        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/new_kare_key.jks
+      - name: Create key.properties
+        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        run: |
+          cat > android/key.properties <<EOF
+          storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
+          keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
+          storeFile=new_kare_key.jks
+          EOF
+      - name: Run tests
+        run: flutter test --no-fail-on-empty-tests
+      - name: Build AAB
+        run: flutter build appbundle --release
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-aab
+          path: build/app/outputs/bundle/release/*.aab
+      - name: Optional: Publish to Play (fastlane)
+        if: ${{ secrets.PUBLISH_PLAYSTORE == 'true' }}
+        run: |
+          gem install bundler && bundle install
+          bundle exec fastlane android release
+        env:
+          JSON_KEY: ${{ secrets.PLAY_STORE_JSON_KEY }}

@@ -1,0 +1,2 @@
+app_identifier("com.example.new_kare") # TODO: replace with your app bundle id
+apple_id("you@example.com") # TODO: replace with your Apple ID
