@@ -130,7 +130,7 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
       - name: Run tests
-        run: flutter test --no-fail-on-empty-tests
+        run: flutter test
       - name: Build appbundle
         run: flutter build appbundle --release
       - name: Upload artifact
