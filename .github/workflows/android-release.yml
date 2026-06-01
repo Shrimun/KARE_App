@@ -27,7 +27,7 @@ jobs:
           storeFile=new_kare_key.jks
           EOF
       - name: Run tests
-        run: flutter test --no-fail-on-empty-tests
+        run: flutter test
       - name: Build AAB
         run: flutter build appbundle --release
       - name: Upload artifact
